@@ -128,6 +128,65 @@ Return ONLY valid JSON:
   "verdict": "<go|caution|avoid>",
   "disclaimer": "AI-generated analysis only. Verify with current sources before making decisions."
 }`,
+
+    6: `${UNCERTAINTY_DISCLAIMER}
+
+You are Agent 6: AI Bottleneck Analyzer (speculative, based on training data patterns).
+Identify the specific bottlenecks, pain points, and friction that AI is creating in the field related to: "${query}"
+Prior context:
+${context}
+
+Think about: job displacement pressure, skill obsolescence, tooling churn, trust gaps, regulatory uncertainty,
+over-reliance on AI leading to skill atrophy, AI-generated noise flooding the field, hiring filter changes,
+credential devaluation, and any emerging friction between human practitioners and AI systems.
+
+Return ONLY valid JSON:
+{
+  "bottlenecks": [
+    { "issue": "<short title>", "severity": "<critical|high|medium|low>", "detail": "<1-2 sentence explanation>", "who_it_hits": "<entry-level|mid-career|senior|everyone>" },
+    { "issue": "<short title>", "severity": "<critical|high|medium|low>", "detail": "<1-2 sentence explanation>", "who_it_hits": "<entry-level|mid-career|senior|everyone>" },
+    { "issue": "<short title>", "severity": "<critical|high|medium|low>", "detail": "<1-2 sentence explanation>", "who_it_hits": "<entry-level|mid-career|senior|everyone>" },
+    { "issue": "<short title>", "severity": "<critical|high|medium|low>", "detail": "<1-2 sentence explanation>", "who_it_hits": "<entry-level|mid-career|senior|everyone>" },
+    { "issue": "<short title>", "severity": "<critical|high|medium|low>", "detail": "<1-2 sentence explanation>", "who_it_hits": "<entry-level|mid-career|senior|everyone>" }
+  ],
+  "pain_points": [
+    "<specific pain point practitioners are experiencing because of AI — be concrete, not vague>",
+    "<specific pain point>",
+    "<specific pain point>"
+  ],
+  "ai_noise_factor": "<low|medium|high — how much AI-generated noise is flooding this field (e.g. AI-written applications, AI-generated content, AI slop)>",
+  "ai_noise_detail": "<1-2 sentences on how AI noise specifically affects this field>",
+  "skill_atrophy_risk": "<low|medium|high — risk that reliance on AI tools causes practitioners to lose core skills>",
+  "skill_atrophy_detail": "<1-2 sentences explaining which skills are at risk of atrophy>",
+  "hiring_impact": "<how AI is changing hiring filters, interview processes, or credential requirements in this field>",
+  "regulatory_friction": "<any regulatory uncertainty or compliance bottlenecks AI is creating>",
+  "silver_lining": "<one genuine opportunity that these AI bottlenecks create for savvy practitioners>",
+  "data_caveat": "<honest note about speculation level>"
+}`,
+
+    7: `${UNCERTAINTY_DISCLAIMER}
+
+You are Agent 7: Final Briefing (synthesised AI opinion, not professional advice).
+Compile findings for: "${query}"
+All prior agent outputs:
+${context}
+
+This is not financial or career advice. Confidence scores reflect AI consistency, not real-world certainty.
+Be direct about what the data supports and what it doesn't.
+Pay special attention to the AI bottleneck analysis — factor those pain points into your recommendation.
+
+Return ONLY valid JSON:
+{
+  "recommendation": "<clear 2-sentence recommendation — include key caveat>",
+  "confidence_score": <number 0-10>,
+  "confidence_note": "<why this score is limited — what the AI couldn't verify>",
+  "doors_opened": ["<opportunity1>", "<opportunity2>", "<opportunity3>"],
+  "doors_closed": ["<limitation1>", "<limitation2>"],
+  "risk_flag": "<the single most important risk — be blunt>",
+  "one_liner": "<one direct sentence summing up the verdict, no sugarcoating>",
+  "verdict": "<go|caution|avoid>",
+  "disclaimer": "AI-generated analysis only. Verify with current sources before making decisions."
+}`,
   };
   return prompts[agentId];
 }
@@ -151,6 +210,8 @@ export async function POST(req: Request) {
     { id: 3, name: "Career Path Mapper" },
     { id: 4, name: "Future-Proofing Checker" },
     { id: 5, name: "Decision Brief" },
+    { id: 6, name: "AI Bottleneck Analyzer" },
+    { id: 7, name: "Final Briefing" },
   ];
 
   const encoder = new TextEncoder();
