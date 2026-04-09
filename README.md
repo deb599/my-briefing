@@ -1,6 +1,6 @@
-# Subject Decision Briefing — 7-Agent AI Pipeline
+# Subject Decision Briefing — 6-Agent AI Pipeline
 
-A brutally honest career and subject research tool. Type any query — "Is data science worth it in 2028", "Should I study nursing or software engineering" — and seven Claude AI agents run sequentially, each building on the last, to give you a grounded, uncertainty-aware briefing.
+A brutally honest career and subject research tool. Type any query — "Is data science worth it in 2028", "Should I study nursing or software engineering" — and six Claude AI agents run sequentially, each building on the last, to give you a grounded, uncertainty-aware briefing.
 
 **No sugar-coating. No hallucinated confidence. Just AI reasoning that tells you what it knows, what it's extrapolating, and where it's guessing.**
 
@@ -18,7 +18,7 @@ Get a key at [console.anthropic.com](https://console.anthropic.com/settings/keys
 
 ## What it does
 
-Runs 7 AI agents in sequence. Each agent reads the previous agents' outputs before responding:
+Runs 6 AI agents in sequence. Each agent reads the previous agents' outputs before responding:
 
 | Agent | Role | What it produces |
 |---|---|---|
@@ -26,9 +26,8 @@ Runs 7 AI agents in sequence. Each agent reads the previous agents' outputs befo
 | 02 · Job Market Scanner | Reads the market | Demand score, top roles, salary ranges, hiring trend |
 | 03 · Career Path Mapper | Maps the routes | Recommended subject combos, career paths, entry points |
 | 04 · Future-Proofing Checker | Stress-tests the bet | AI disruption risk, 5-year outlook, safe bets vs. avoid |
-| 05 · Decision Brief | Calls the verdict | GO / CAUTION / AVOID with confidence score and risk flag |
-| 06 · AI Bottleneck Analyzer | Finds the friction | AI-caused bottlenecks, pain points, skill atrophy risks, hiring impact |
-| 07 · Final Briefing | Synthesises everything | Updated recommendation factoring in AI disruption and bottlenecks |
+| 05 · AI Bottleneck Analyzer | Finds the friction | AI-caused bottlenecks, pain points, skill atrophy risks, hiring impact |
+| 06 · Final Briefing | Calls the verdict | GO / CAUTION / AVOID with confidence score, risk flag, and bottleneck-aware recommendation |
 
 Every output includes:
 - Confidence ranges, not false precision
@@ -69,10 +68,10 @@ User query
 Agent 1 (Sentiment) ──► Agent 2 (Job Market) ──► Agent 3 (Career Paths)
                                                          │
                                                          ▼
-Agent 7 (Final Briefing) ◄── Agent 6 (AI Bottlenecks) ◄── Agent 5 (Decision Brief) ◄── Agent 4 (Future-Proof)
+              Agent 6 (Final Briefing) ◄── Agent 5 (AI Bottlenecks) ◄── Agent 4 (Future-Proof)
 ```
 
-Each agent receives the full output of all previous agents as context before it runs. Agent 7 sees everything — including the AI bottleneck analysis — before producing the final recommendation.
+Each agent receives the full output of all previous agents as context before it runs. Agent 6 sees everything — including the AI bottleneck analysis — before producing the final recommendation.
 
 The API route streams Claude's response token-by-token via SSE. The frontend shows the raw text streaming in real time, then renders the parsed JSON into structured cards when each agent completes.
 
@@ -120,7 +119,7 @@ app/
 ├── globals.css           # Dark theme design system (CSS custom properties + animations)
 └── api/
     ├── pipeline/
-    │   └── route.ts      # 7-agent SSE stream — prompts, Claude calls, JSON parsing
+    │   └── route.ts      # 6-agent SSE stream — prompts, Claude calls, JSON parsing
     └── capture/
         └── route.ts      # Email lead capture — stores to leads.json
 ```
@@ -133,10 +132,10 @@ app/
 The app runs on Claude Opus — not cheap per query. BYOK means you control your own usage and costs. The key is sent in the request body over HTTPS, used in-memory for that request, and never logged or persisted.
 
 **Why not just one Claude call?**
-Sequential agents with context-passing catches contradictions, builds reasoning depth, and makes the uncertainty visible step by step. Agent 7's final recommendation reflects how consistently all six prior agents agreed — not just how confident Claude sounds.
+Sequential agents with context-passing catches contradictions, builds reasoning depth, and makes the uncertainty visible step by step. Agent 6's final recommendation reflects how consistently all five prior agents agreed — not just how confident Claude sounds.
 
-**Why 7 agents instead of 5?**
-Agent 6 (AI Bottleneck Analyzer) was added to identify the specific friction AI is causing in each field — skill atrophy, hiring filter changes, noise flooding, regulatory uncertainty. Agent 7 then factors those bottlenecks into the final recommendation, producing a more grounded verdict.
+**Why a dedicated AI Bottleneck agent?**
+Agent 5 (AI Bottleneck Analyzer) identifies the specific friction AI is causing in each field — skill atrophy, hiring filter changes, noise flooding, regulatory uncertainty. Agent 6 then factors those bottlenecks into the final recommendation, producing a more grounded verdict.
 
 **Why stream the raw output?**
 Watching the AI reason in real time, including hedges and self-corrections as it writes JSON, is more honest than presenting a polished card after a loading spinner. You see what you're actually getting.
@@ -152,7 +151,7 @@ This is a reasoning tool, not a data aggregator. It's upfront that everything is
 - Salary figures, job volumes, and hiring trends are extrapolations — not live scrapes
 - Future-date queries (2028+) are forecasting exercises, not verified predictions
 - Character and cultural context will affect outputs (tuned for Australian context but broadly applicable)
-- Claude Opus is not cheap. A full 7-agent run costs approximately $0.08–0.20 USD depending on query length
+- Claude Opus is not cheap. A full 6-agent run costs approximately $0.07–0.18 USD depending on query length
 
 ---
 
