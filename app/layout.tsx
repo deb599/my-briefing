@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Subject Decision Briefing",
-  description: "5-Agent Pipeline Output",
+  description: "6-Agent AI Pipeline — brutally honest career and subject research",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
