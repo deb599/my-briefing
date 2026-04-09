@@ -8,6 +8,8 @@ const AGENTS = [
   { id: 3, name: "Career Path Mapper" },
   { id: 4, name: "Future-Proofing Checker" },
   { id: 5, name: "Decision Brief" },
+  { id: 6, name: "AI Bottleneck Analyzer" },
+  { id: 7, name: "Final Briefing" },
 ];
 
 type AgentStatus = "idle" | "running" | "complete" | "error";
@@ -18,25 +20,53 @@ interface AgentState {
   streamText: string;
 }
 
+/* ───── tiny components ───── */
+
 function CaveatBadge({ text }: { text: string }) {
   return (
-    <span className="inline-block bg-yellow-900/40 border border-yellow-700/50 text-yellow-500 text-xs font-mono px-2 py-0.5 rounded">
+    <span
+      style={{
+        display: "inline-block",
+        background: "var(--warn-dim)",
+        border: "1px solid rgba(245,158,11,.25)",
+        color: "var(--warn)",
+        fontFamily: "var(--mono)",
+        fontSize: ".68rem",
+        padding: "3px 10px",
+        borderRadius: "3px",
+      }}
+    >
       ⚠ {text}
     </span>
   );
 }
 
-function UncertainScore({ value, note }: { value: number; note?: string }) {
+function ScoreBar({ value, label, note }: { value: number; label?: string; note?: string }) {
+  const pct = Math.max(0, Math.min(100, (value / 10) * 100));
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-3">
-        <span className="text-gray-500 text-xs font-mono">score:</span>
-        <span className="text-white font-mono font-bold">{value}/10</span>
-        <span className="text-gray-600 text-xs">
-          [{Array.from({ length: 10 }, (_, i) => (i < value ? "█" : "░")).join("")}]
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {label && (
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".65rem", color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: ".1em", minWidth: 50 }}>
+            {label}
+          </span>
+        )}
+        <div style={{ flex: 1, height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
+          <div
+            style={{
+              height: "100%",
+              width: `${pct}%`,
+              borderRadius: 3,
+              background: pct > 70 ? "var(--accent)" : pct > 40 ? "var(--warn)" : "var(--decline)",
+              transition: "width .8s ease",
+            }}
+          />
+        </div>
+        <span style={{ fontFamily: "var(--mono)", fontSize: ".85rem", fontWeight: 700, color: pct > 70 ? "var(--accent)" : pct > 40 ? "var(--warn)" : "var(--decline)", whiteSpace: "nowrap" }}>
+          {value}/10
         </span>
       </div>
-      {note && <p className="text-yellow-600 text-xs font-mono">note: {note}</p>}
+      {note && <p style={{ fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--warn)", marginTop: 4, marginLeft: label ? 62 : 0 }}>note: {note}</p>}
     </div>
   );
 }
@@ -46,24 +76,98 @@ function StreamingLog({ text, active }: { text: string; active: boolean }) {
   useEffect(() => {
     if (ref.current) ref.current.scrollTop = ref.current.scrollHeight;
   }, [text]);
-
   if (!text && !active) return null;
-
   return (
-    <div className="mt-3">
-      <p className="text-gray-600 text-xs font-mono mb-1 uppercase tracking-widest">
+    <div style={{ marginTop: 16 }}>
+      <p style={{ fontFamily: "var(--mono)", fontSize: ".6rem", color: "var(--text-dim)", letterSpacing: ".15em", textTransform: "uppercase", marginBottom: 6 }}>
         {active ? "▶ raw output (streaming...)" : "▶ raw output"}
       </p>
       <div
         ref={ref}
-        className="bg-black border border-gray-800 rounded p-3 max-h-48 overflow-y-auto text-xs font-mono text-gray-500 whitespace-pre-wrap leading-relaxed"
+        style={{
+          background: "rgba(0,0,0,.4)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          padding: 14,
+          maxHeight: 160,
+          overflowY: "auto",
+          fontFamily: "var(--mono)",
+          fontSize: ".72rem",
+          color: "var(--text-dim)",
+          whiteSpace: "pre-wrap",
+          lineHeight: 1.55,
+        }}
       >
         {text}
-        {active && <span className="text-teal-400 animate-pulse">▌</span>}
+        {active && <span style={{ color: "var(--accent)", animation: "pulse 1s infinite" }}>▌</span>}
       </div>
     </div>
   );
 }
+
+/* ───── pipeline node ───── */
+
+function PipelineNode({ agent, status }: { agent: typeof AGENTS[0]; status: AgentStatus }) {
+  const isComplete = status === "complete";
+  const isRunning = status === "running";
+  const dotBorder = isComplete ? "var(--accent)" : isRunning ? "var(--warn)" : "var(--border)";
+  const innerColor = isComplete ? "var(--accent)" : isRunning ? "var(--warn)" : "var(--border)";
+  const nameColor = isComplete ? "var(--text)" : isRunning ? "var(--warn)" : "var(--text-dim)";
+
+  return (
+    <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, minWidth: 110 }}>
+      <span style={{ fontFamily: "var(--mono)", fontSize: ".6rem", color: "var(--text-dim)", letterSpacing: ".1em" }}>
+        {String(agent.id).padStart(2, "0")}
+      </span>
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          background: "var(--surface-raised)",
+          border: `2px solid ${dotBorder}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: innerColor,
+            boxShadow: isComplete || isRunning ? `0 0 12px ${innerColor}` : "none",
+            animation: isRunning ? "pulse 2s infinite" : isComplete ? "none" : "none",
+          }}
+        />
+      </div>
+      <span style={{ fontFamily: "var(--mono)", fontSize: ".65rem", color: nameColor, textAlign: "center", maxWidth: 100, lineHeight: 1.35 }}>
+        {agent.name}
+      </span>
+    </div>
+  );
+}
+
+function PipelineConnector({ active }: { active: boolean }) {
+  return (
+    <div
+      style={{
+        flex: "1 1 auto",
+        minWidth: 16,
+        height: 2,
+        background: active ? "linear-gradient(90deg, var(--accent), var(--border-accent))" : "var(--border)",
+        alignSelf: "center",
+        marginTop: -14,
+        transition: "background .5s ease",
+      }}
+    />
+  );
+}
+
+/* ───── agent card renderers ───── */
+/* PLACEHOLDER: filled in below */
 
 function AgentCard({ agentId, data, streamText, status }: {
   agentId: number;
@@ -73,274 +177,434 @@ function AgentCard({ agentId, data, streamText, status }: {
 }) {
   const isRunning = status === "running";
   const isDone = status === "complete";
-
-  const borderColor = isRunning
-    ? "border-yellow-700"
-    : isDone
-    ? "border-gray-700"
-    : "border-gray-800";
+  const borderColor = isRunning ? "var(--warn)" : isDone ? "var(--border-accent)" : "var(--border)";
 
   return (
-    <div className={`border ${borderColor} rounded bg-[#0d0d0d] p-5 space-y-4 transition-colors`}>
+    <div
+      style={{
+        border: `1px solid ${borderColor}`,
+        borderRadius: "var(--radius)",
+        background: "var(--surface)",
+        padding: "28px 32px",
+        transition: "border-color .4s ease",
+        animation: "fadeUp .5s forwards",
+      }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-gray-600 font-mono text-xs">AGENT_{String(agentId).padStart(2, "0")}</span>
-          <span className="text-white font-mono text-sm font-bold">{AGENTS[agentId - 1].name}</span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: ".7rem",
+              background: "var(--accent-dim)",
+              color: "var(--accent)",
+              padding: "3px 9px",
+              borderRadius: 3,
+              letterSpacing: ".05em",
+            }}
+          >
+            {String(agentId).padStart(2, "0")}
+          </span>
+          <span style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-bright)" }}>
+            {AGENTS[agentId - 1].name}
+          </span>
         </div>
-        <span className={`text-xs font-mono px-2 py-0.5 border rounded ${
-          isRunning
-            ? "border-yellow-700 text-yellow-600 animate-pulse"
-            : isDone
-            ? "border-gray-700 text-gray-500"
-            : "border-gray-800 text-gray-700"
-        }`}>
-          {isRunning ? "RUNNING" : isDone ? "DONE" : "IDLE"}
+        <span
+          style={{
+            fontFamily: "var(--mono)",
+            fontSize: ".62rem",
+            letterSpacing: ".1em",
+            textTransform: "uppercase" as const,
+            padding: "3px 10px",
+            borderRadius: 3,
+            border: `1px solid ${isRunning ? "var(--warn)" : isDone ? "var(--border)" : "var(--border)"}`,
+            color: isRunning ? "var(--warn)" : isDone ? "var(--text-dim)" : "var(--text-dim)",
+            animation: isRunning ? "pulse 1.5s infinite" : "none",
+          }}
+        >
+          {isRunning ? "RUNNING" : isDone ? "COMPLETE" : "IDLE"}
         </span>
       </div>
 
-      {/* Streaming raw output */}
+      {/* Streaming */}
       <StreamingLog text={streamText} active={isRunning} />
 
       {/* Parsed results */}
       {isDone && data && (
-        <div className="space-y-4 border-t border-gray-800 pt-4">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600 text-xs font-mono uppercase tracking-widest">parsed output</span>
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginTop: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <span style={{ fontFamily: "var(--mono)", fontSize: ".6rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)" }}>
+              parsed output
+            </span>
             <CaveatBadge text="AI-estimated, not live data" />
           </div>
 
-          {agentId === 1 && (
-            <div className="space-y-3">
-              <UncertainScore
-                value={Number(data.score) || 0}
-                note={String(data.score_confidence || "")}
-              />
-              <p className="text-gray-400 text-sm leading-relaxed border-l border-gray-700 pl-3">
-                {String(data.summary || "")}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {(data.top_themes as string[] || []).map((t, i) => (
-                  <span key={i} className="text-xs font-mono text-gray-500 border border-gray-700 px-2 py-0.5 rounded">
-                    {t}
-                  </span>
-                ))}
-              </div>
-              {data.data_caveat ? (
-                <p className="text-yellow-700 text-xs font-mono border border-yellow-900/50 rounded p-2 bg-yellow-900/10">
-                  CAVEAT: {String(data.data_caveat)}
-                </p>
-              ) : null}
-              {data.key_quote ? (
-                <p className="text-gray-600 text-sm italic border-l border-gray-700 pl-3">
-                  &ldquo;{String(data.key_quote)}&rdquo;
-                </p>
-              ) : null}
-            </div>
-          )}
+          {/* Agent 1: Sentiment */}
+          {agentId === 1 && renderAgent1(data)}
 
-          {agentId === 2 && (
-            <div className="space-y-3">
-              <UncertainScore
-                value={Number(data.demand_score) || 0}
-                note={String(data.demand_score_note || "")}
-              />
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600 font-mono text-xs mb-2 uppercase">Top Roles</p>
-                  <ul className="space-y-1">
-                    {(data.top_roles as string[] || []).map((r, i) => (
-                      <li key={i} className="text-gray-400 text-xs font-mono">
-                        <span className="text-gray-600">→ </span>{r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-gray-600 font-mono text-xs mb-2 uppercase">Industries</p>
-                  <ul className="space-y-1">
-                    {(data.top_industries as string[] || []).map((ind, i) => (
-                      <li key={i} className="text-gray-400 text-xs font-mono">
-                        <span className="text-gray-600">→ </span>{ind}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              {data.salary_range ? (
-                <div className="border border-gray-800 rounded p-2 text-xs font-mono">
-                  <span className="text-gray-600">salary est: </span>
-                  <span className="text-white">
-                    AU${((data.salary_range as Record<string, number>).min / 1000).toFixed(0)}K–
-                    AU${((data.salary_range as Record<string, number>).max / 1000).toFixed(0)}K
-                  </span>
-                  <span className="text-yellow-700 ml-2">
-                    ({(data.salary_range as Record<string, unknown>).note as string || "estimate only"})
-                  </span>
-                </div>
-              ) : null}
-              <p className="text-gray-500 text-xs font-mono">
-                vol: {String(data.job_volume_estimate || "unknown")} · trend: {String(data.hiring_trend || "unknown")}
-              </p>
-              {(data.data_gaps as string[] || []).length > 0 && (
-                <div className="border border-yellow-900/40 rounded p-2 bg-yellow-900/5">
-                  <p className="text-yellow-700 text-xs font-mono mb-1">DATA GAPS:</p>
-                  {(data.data_gaps as string[]).map((g, i) => (
-                    <p key={i} className="text-yellow-800 text-xs font-mono">— {g}</p>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Agent 2: Job Market */}
+          {agentId === 2 && renderAgent2(data)}
 
-          {agentId === 3 && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {(data.recommended_combinations as string[] || []).map((c, i) => (
-                  <span key={i} className="text-xs font-mono text-gray-400 border border-gray-700 px-2 py-0.5 rounded">
-                    {c}
-                  </span>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {(data.top_career_paths as Array<Record<string, unknown>> || []).map((p, i) => (
-                  <div key={i} className="border border-gray-800 rounded px-3 py-2 text-xs font-mono">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">{String(p.title)}</span>
-                      <div className="text-right">
-                        <span className="text-gray-400">
-                          AU${(Number(p.avg_salary_aud) / 1000).toFixed(0)}K · {String(p.years_to_reach)}
-                        </span>
-                        <span className="text-yellow-800 ml-2">
-                          [{String(p.salary_certainty || "?")} certainty]
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {data.entry_point ? (
-                <p className="text-gray-400 text-xs font-mono border-l border-gray-700 pl-2">
-                  entry: {String(data.entry_point)}
-                </p>
-              ) : null}
-              {data.path_caveats ? (
-                <p className="text-yellow-700 text-xs font-mono border border-yellow-900/50 rounded p-2 bg-yellow-900/10">
-                  CAVEAT: {String(data.path_caveats)}
-                </p>
-              ) : null}
-            </div>
-          )}
+          {/* Agent 3: Career Path */}
+          {agentId === 3 && renderAgent3(data)}
 
-          {agentId === 4 && (
-            <div className="space-y-3">
-              <UncertainScore
-                value={Number(data.trajectory_score) || 0}
-                note={String(data.trajectory_note || "")}
-              />
-              <div className="text-xs font-mono space-y-1">
-                <p>
-                  <span className="text-gray-600">trajectory: </span>
-                  <span className="text-gray-300">{String(data.growth_trajectory || "")}</span>
-                </p>
-                <p>
-                  <span className="text-gray-600">ai_disruption: </span>
-                  <span className={
-                    data.ai_disruption_risk === "high" ? "text-red-500" :
-                    data.ai_disruption_risk === "medium" ? "text-yellow-500" :
-                    "text-gray-300"
-                  }>{String(data.ai_disruption_risk || "")}</span>
-                </p>
-                <p>
-                  <span className="text-gray-600">5yr_outlook: </span>
-                  <span className="text-gray-300">{String(data.five_year_outlook || "")}</span>
-                </p>
-              </div>
-              {data.ai_risk_detail ? (
-                <p className="text-gray-500 text-xs border-l border-gray-700 pl-2 leading-relaxed">
-                  {String(data.ai_risk_detail)}
-                </p>
-              ) : null}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-600 text-xs font-mono mb-1">SAFE BETS</p>
-                  {(data.safe_bets as string[] || []).map((s, i) => (
-                    <p key={i} className="text-gray-400 text-xs font-mono">✓ {s}</p>
-                  ))}
-                </div>
-                <div>
-                  <p className="text-gray-600 text-xs font-mono mb-1">AVOID</p>
-                  {(data.subjects_to_avoid as string[] || []).map((s, i) => (
-                    <p key={i} className="text-gray-500 text-xs font-mono line-through">✗ {s}</p>
-                  ))}
-                </div>
-              </div>
-              {data.five_year_note ? (
-                <p className="text-yellow-700 text-xs font-mono border border-yellow-900/50 rounded p-2 bg-yellow-900/10">
-                  FORECAST CAVEAT: {String(data.five_year_note)}
-                </p>
-              ) : null}
-              {data.wildcard_risk ? (
-                <p className="text-red-800 text-xs font-mono border border-red-900/30 rounded p-2 bg-red-900/5">
-                  WILDCARD: {String(data.wildcard_risk)}
-                </p>
-              ) : null}
-            </div>
-          )}
+          {/* Agent 4: Future-Proofing */}
+          {agentId === 4 && renderAgent4(data)}
 
-          {agentId === 5 && (
-            <div className="space-y-4">
-              <div className={`border rounded p-3 text-sm ${
-                data.verdict === "go"
-                  ? "border-green-900 bg-green-900/10 text-green-400"
-                  : data.verdict === "avoid"
-                  ? "border-red-900 bg-red-900/10 text-red-400"
-                  : "border-yellow-900 bg-yellow-900/10 text-yellow-400"
-              }`}>
-                <span className="font-mono text-xs uppercase">verdict: </span>
-                <span className="font-bold font-mono">{String(data.verdict || "").toUpperCase()}</span>
-              </div>
-              <UncertainScore
-                value={Number(data.confidence_score) || 0}
-                note={String(data.confidence_note || "")}
-              />
-              <p className="text-gray-400 text-sm leading-relaxed border-l border-gray-700 pl-3">
-                {String(data.recommendation || "")}
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                <div>
-                  <p className="text-gray-600 mb-1 uppercase">Opens</p>
-                  {(data.doors_opened as string[] || []).map((d, i) => (
-                    <p key={i} className="text-gray-400">→ {d}</p>
-                  ))}
-                </div>
-                <div>
-                  <p className="text-gray-600 mb-1 uppercase">Closes</p>
-                  {(data.doors_closed as string[] || []).map((d, i) => (
-                    <p key={i} className="text-gray-500 line-through">✗ {d}</p>
-                  ))}
-                </div>
-              </div>
-              {data.risk_flag ? (
-                <p className="text-red-600 text-xs font-mono border border-red-900/30 rounded p-2 bg-red-900/5">
-                  RISK: {String(data.risk_flag)}
-                </p>
-              ) : null}
-              {data.one_liner ? (
-                <p className="text-gray-300 text-sm font-mono border-l-2 border-gray-600 pl-3 italic">
-                  {String(data.one_liner)}
-                </p>
-              ) : null}
-              <p className="text-gray-700 text-xs font-mono">
-                {String(data.disclaimer || "AI-generated analysis only. Verify with current sources before making decisions.")}
-              </p>
-            </div>
-          )}
+          {/* Agent 5: Decision Brief */}
+          {agentId === 5 && renderAgent6(data)}
+
+          {/* Agent 6: AI Bottleneck */}
+          {agentId === 6 && renderAgent5(data)}
+
+          {/* Agent 7: Final Briefing */}
+          {agentId === 7 && renderAgent6(data)}
         </div>
       )}
     </div>
   );
 }
+
+/* ───── Agent render functions ───── */
+
+function renderAgent1(data: Record<string, unknown>) {
+  return (
+    <div>
+      <ScoreBar value={Number(data.score) || 0} label="score" note={String(data.score_confidence || "")} />
+      <p style={{ color: "var(--text)", fontSize: ".88rem", lineHeight: 1.65, borderLeft: "2px solid var(--border)", paddingLeft: 16, margin: "16px 0" }}>
+        {String(data.summary || "")}
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+        {((data.top_themes as string[]) || []).map((t, i) => (
+          <span key={i} style={{ fontFamily: "var(--mono)", fontSize: ".7rem", padding: "5px 12px", borderRadius: 20, background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}>
+            {t}
+          </span>
+        ))}
+      </div>
+      {data.data_caveat ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em", textTransform: "uppercase" as const }}>CAVEAT: </span>
+          {String(data.data_caveat)}
+        </div>
+      ) : null}
+      {data.key_quote ? (
+        <p style={{ color: "var(--text-dim)", fontSize: ".86rem", fontStyle: "italic", borderLeft: "2px solid var(--border)", paddingLeft: 16, marginTop: 16 }}>
+          &ldquo;{String(data.key_quote)}&rdquo;
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function renderAgent2(data: Record<string, unknown>) {
+  const roles = (data.top_roles as string[]) || [];
+  const industries = (data.top_industries as string[]) || [];
+  const salary = data.salary_range as Record<string, unknown> | undefined;
+  const gaps = (data.data_gaps as string[]) || [];
+  return (
+    <div>
+      <ScoreBar value={Number(data.demand_score) || 0} label="demand" note={String(data.demand_score_note || "")} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, margin: "20px 0" }}>
+        <div>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 10 }}>Top Roles</p>
+          {roles.map((r, i) => (
+            <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", padding: "4px 0", paddingLeft: 14, position: "relative" }}>
+              <span style={{ position: "absolute", left: 0, top: 10, width: 5, height: 5, borderRadius: "50%", background: "var(--accent)" }} />
+              {r}
+            </p>
+          ))}
+        </div>
+        <div>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 10 }}>Industries</p>
+          {industries.map((ind, i) => (
+            <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", padding: "4px 0", paddingLeft: 14, position: "relative" }}>
+              <span style={{ position: "absolute", left: 0, top: 10, width: 5, height: 5, borderRadius: "50%", background: "var(--warn)" }} />
+              {ind}
+            </p>
+          ))}
+        </div>
+      </div>
+      {salary ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--accent-dim)", borderLeft: "3px solid var(--accent)", fontSize: ".86rem", marginBottom: 16 }}>
+          <span style={{ fontFamily: "var(--mono)", color: "var(--accent)", fontWeight: 700 }}>
+            AU${((salary.min as number) / 1000).toFixed(0)}K–AU${((salary.max as number) / 1000).toFixed(0)}K
+          </span>
+          <span style={{ color: "var(--text-dim)", fontSize: ".78rem", marginLeft: 10 }}>({String(salary.note || "estimate only")})</span>
+        </div>
+      ) : null}
+      <p style={{ fontFamily: "var(--mono)", fontSize: ".78rem", color: "var(--text-dim)", marginBottom: 12 }}>
+        vol: {String(data.job_volume_estimate || "unknown")} · trend: <span style={{ color: "var(--text)" }}>{String(data.hiring_trend || "unknown")}</span>
+      </p>
+      {gaps.length > 0 ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em", textTransform: "uppercase" as const, marginBottom: 6 }}>DATA GAPS</p>
+          {gaps.map((g, i) => <p key={i} style={{ fontSize: ".82rem", color: "var(--text)", lineHeight: 1.55 }}>— {g}</p>)}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function renderAgent3(data: Record<string, unknown>) {
+  const combos = (data.recommended_combinations as string[]) || [];
+  const paths = (data.top_career_paths as Array<Record<string, unknown>>) || [];
+  const skills = (data.transferable_skills as string[]) || [];
+  return (
+    <div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+        {combos.map((c, i) => (
+          <span key={i} style={{ fontFamily: "var(--mono)", fontSize: ".72rem", padding: "6px 14px", borderRadius: 20, background: "var(--accent-dim)", border: "1px solid var(--border-accent)", color: "var(--accent)" }}>
+            {c}
+          </span>
+        ))}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+        {paths.map((p, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)" }}>
+            <span style={{ fontWeight: 600, color: "var(--text-bright)", fontSize: ".88rem" }}>{String(p.title)}</span>
+            <div style={{ textAlign: "right", fontFamily: "var(--mono)", fontSize: ".78rem" }}>
+              <span style={{ color: "var(--accent)" }}>AU${(Number(p.avg_salary_aud) / 1000).toFixed(0)}K</span>
+              <span style={{ color: "var(--text-dim)", margin: "0 8px" }}>·</span>
+              <span style={{ color: "var(--text-dim)" }}>{String(p.years_to_reach)}</span>
+              <span style={{ color: "var(--warn)", marginLeft: 8, fontSize: ".68rem" }}>[{String(p.salary_certainty || "?")} certainty]</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {skills.length > 0 ? (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+          {skills.map((s, i) => (
+            <span key={i} style={{ fontFamily: "var(--mono)", fontSize: ".7rem", padding: "5px 12px", borderRadius: 20, background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}>
+              {s}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {data.entry_point ? (
+        <p style={{ fontSize: ".86rem", color: "var(--text)", borderLeft: "2px solid var(--accent)", paddingLeft: 14 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".65rem", color: "var(--text-dim)", letterSpacing: ".1em" }}>ENTRY: </span>
+          {String(data.entry_point)}
+        </p>
+      ) : null}
+      {data.path_caveats ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6, marginTop: 16 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em" }}>CAVEAT: </span>
+          {String(data.path_caveats)}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function renderAgent4(data: Record<string, unknown>) {
+  const safeBets = (data.safe_bets as string[]) || [];
+  const avoids = (data.subjects_to_avoid as string[]) || [];
+  return (
+    <div>
+      <ScoreBar value={Number(data.trajectory_score) || 0} label="trajectory" note={String(data.trajectory_note || "")} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "16px 0", fontFamily: "var(--mono)", fontSize: ".78rem" }}>
+        <p><span style={{ color: "var(--text-dim)" }}>growth: </span><span style={{ color: "var(--text-bright)" }}>{String(data.growth_trajectory || "")}</span></p>
+        <p>
+          <span style={{ color: "var(--text-dim)" }}>ai_disruption: </span>
+          <span style={{ color: data.ai_disruption_risk === "high" ? "var(--danger)" : data.ai_disruption_risk === "medium" ? "var(--warn)" : "var(--text)" }}>
+            {String(data.ai_disruption_risk || "")}
+          </span>
+        </p>
+        <p><span style={{ color: "var(--text-dim)" }}>5yr_outlook: </span><span style={{ color: "var(--text-bright)" }}>{String(data.five_year_outlook || "")}</span></p>
+      </div>
+      {data.ai_risk_detail ? (
+        <p style={{ fontSize: ".86rem", color: "var(--text)", borderLeft: "2px solid var(--border)", paddingLeft: 14, lineHeight: 1.65, margin: "16px 0" }}>
+          {String(data.ai_risk_detail)}
+        </p>
+      ) : null}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+        <div style={{ padding: 20, borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderTop: "3px solid var(--grow)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--grow)", marginBottom: 12 }}>SAFE BETS</p>
+          {safeBets.map((s, i) => (
+            <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", padding: "6px 0", borderBottom: i < safeBets.length - 1 ? "1px solid var(--border)" : "none" }}>✓ {s}</p>
+          ))}
+        </div>
+        <div style={{ padding: 20, borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderTop: "3px solid var(--decline)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--decline)", marginBottom: 12 }}>AVOID</p>
+          {avoids.map((s, i) => (
+            <p key={i} style={{ fontSize: ".84rem", color: "var(--text-dim)", padding: "6px 0", textDecoration: "line-through", borderBottom: i < avoids.length - 1 ? "1px solid var(--border)" : "none" }}>✗ {s}</p>
+          ))}
+        </div>
+      </div>
+      {data.five_year_note ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em" }}>FORECAST CAVEAT: </span>
+          {String(data.five_year_note)}
+        </div>
+      ) : null}
+      {data.wildcard_risk ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--danger-dim)", borderLeft: "3px solid var(--danger)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--danger)", letterSpacing: ".1em" }}>WILDCARD: </span>
+          {String(data.wildcard_risk)}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function renderAgent5(data: Record<string, unknown>) {
+  const bottlenecks = (data.bottlenecks || []) as Array<Record<string, unknown>>;
+  const painPoints = (data.pain_points || []) as string[];
+  const noiseLevel = String(data.ai_noise_factor || "unknown");
+  const noiseDetail = data.ai_noise_detail ? String(data.ai_noise_detail) : "";
+  const atrophyLevel = String(data.skill_atrophy_risk || "unknown");
+  const atrophyDetail = data.skill_atrophy_detail ? String(data.skill_atrophy_detail) : "";
+  const hiringImpact = data.hiring_impact ? String(data.hiring_impact) : "";
+  const regFriction = data.regulatory_friction ? String(data.regulatory_friction) : "";
+  const silverLining = data.silver_lining ? String(data.silver_lining) : "";
+  const caveat = data.data_caveat ? String(data.data_caveat) : "";
+
+  const severityColor = (s: unknown) =>
+    s === "critical" ? "var(--danger)" : s === "high" ? "var(--orange)" : s === "medium" ? "var(--warn)" : "var(--text-dim)";
+  const severityBg = (s: unknown) =>
+    s === "critical" ? "var(--danger-dim)" : s === "high" ? "var(--orange-dim)" : s === "medium" ? "var(--warn-dim)" : "rgba(107,112,132,.08)";
+
+  return (
+    <div>
+      {/* Bottlenecks */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+        <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)" }}>bottlenecks</p>
+        {bottlenecks.map((b, i) => (
+          <div key={i} style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: severityBg(b.severity), border: `1px solid ${severityColor(b.severity)}33`, borderLeft: `3px solid ${severityColor(b.severity)}` }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ fontWeight: 700, fontSize: ".86rem", color: severityColor(b.severity) }}>{String(b.issue)}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontFamily: "var(--mono)", fontSize: ".6rem", padding: "2px 8px", borderRadius: 3, background: `${severityColor(b.severity)}22`, color: severityColor(b.severity), textTransform: "uppercase" as const, letterSpacing: ".08em" }}>
+                  {String(b.severity)}
+                </span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: ".6rem", color: "var(--text-dim)" }}>hits: {String(b.who_it_hits)}</span>
+              </div>
+            </div>
+            <p style={{ fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6 }}>{String(b.detail)}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Pain Points */}
+      {painPoints.length > 0 ? (
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 10 }}>pain points</p>
+          {painPoints.map((p, i) => (
+            <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6, paddingLeft: 16, position: "relative", marginBottom: 6 }}>
+              <span style={{ position: "absolute", left: 0, color: "var(--decline)" }}>▸</span>
+              {p}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {/* AI Noise & Skill Atrophy */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+        <div style={{ padding: 20, borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 8 }}>ai noise factor</p>
+          <p style={{ fontFamily: "var(--mono)", fontSize: "1rem", fontWeight: 700, color: noiseLevel === "high" ? "var(--danger)" : noiseLevel === "medium" ? "var(--warn)" : "var(--text)" }}>
+            {noiseLevel.toUpperCase()}
+          </p>
+          {noiseDetail ? <p style={{ fontSize: ".78rem", color: "var(--text-dim)", marginTop: 6, lineHeight: 1.55 }}>{noiseDetail}</p> : null}
+        </div>
+        <div style={{ padding: 20, borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 8 }}>skill atrophy risk</p>
+          <p style={{ fontFamily: "var(--mono)", fontSize: "1rem", fontWeight: 700, color: atrophyLevel === "high" ? "var(--danger)" : atrophyLevel === "medium" ? "var(--warn)" : "var(--text)" }}>
+            {atrophyLevel.toUpperCase()}
+          </p>
+          {atrophyDetail ? <p style={{ fontSize: ".78rem", color: "var(--text-dim)", marginTop: 6, lineHeight: 1.55 }}>{atrophyDetail}</p> : null}
+        </div>
+      </div>
+
+      {/* Hiring & Regulatory */}
+      {hiringImpact ? (
+        <div style={{ borderLeft: "2px solid var(--border)", paddingLeft: 16, marginBottom: 16 }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 4 }}>hiring impact</p>
+          <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6 }}>{hiringImpact}</p>
+        </div>
+      ) : null}
+      {regFriction ? (
+        <div style={{ borderLeft: "2px solid var(--border)", paddingLeft: 16, marginBottom: 16 }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 4 }}>regulatory friction</p>
+          <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6 }}>{regFriction}</p>
+        </div>
+      ) : null}
+
+      {/* Silver Lining */}
+      {silverLining ? (
+        <div style={{ padding: "18px 22px", borderRadius: "var(--radius)", background: "var(--accent-dim)", borderLeft: "3px solid var(--accent)", marginBottom: 16 }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--accent)", letterSpacing: ".15em", textTransform: "uppercase" as const, marginBottom: 6 }}>SILVER LINING</p>
+          <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.65 }}>{silverLining}</p>
+        </div>
+      ) : null}
+
+      {caveat ? (
+        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6 }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em" }}>CAVEAT: </span>
+          {caveat}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function renderAgent6(data: Record<string, unknown>) {
+  const verdict = String(data.verdict || "").toLowerCase();
+  const verdictColor = verdict === "go" ? "var(--grow)" : verdict === "avoid" ? "var(--danger)" : "var(--warn)";
+  const verdictBg = verdict === "go" ? "rgba(34,197,94,.1)" : verdict === "avoid" ? "var(--danger-dim)" : "var(--warn-dim)";
+  const doors = (data.doors_opened as string[]) || [];
+  const closed = (data.doors_closed as string[]) || [];
+
+  return (
+    <div style={{ padding: "28px 32px", borderRadius: "var(--radius)", background: "var(--surface-raised)", borderLeft: `4px solid ${verdictColor}`, position: "relative", overflow: "hidden" }}>
+      <div style={{ content: "''", position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, ${verdictColor}, transparent)` }} />
+
+      {/* Verdict */}
+      <div style={{ display: "inline-block", padding: "8px 18px", borderRadius: "var(--radius)", background: verdictBg, border: `1px solid ${verdictColor}`, marginBottom: 20 }}>
+        <span style={{ fontFamily: "var(--mono)", fontSize: ".65rem", color: verdictColor, letterSpacing: ".1em" }}>VERDICT: </span>
+        <span style={{ fontFamily: "var(--mono)", fontSize: "1rem", fontWeight: 700, color: verdictColor }}>{verdict.toUpperCase()}</span>
+      </div>
+
+      <ScoreBar value={Number(data.confidence_score) || 0} label="confidence" note={String(data.confidence_note || "")} />
+
+      <p style={{ fontSize: ".9rem", color: "var(--text)", lineHeight: 1.7, borderLeft: "2px solid var(--border)", paddingLeft: 16, margin: "20px 0" }}>
+        {String(data.recommendation || "")}
+      </p>
+
+      {/* Doors */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+        <div style={{ padding: 18, borderRadius: "var(--radius)", background: "var(--surface)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".6rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--grow)", marginBottom: 10 }}>DOORS OPENED</p>
+          {doors.map((d, i) => <p key={i} style={{ fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6 }}>→ {d}</p>)}
+        </div>
+        <div style={{ padding: 18, borderRadius: "var(--radius)", background: "var(--surface)" }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".6rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 10 }}>DOORS CLOSED</p>
+          {closed.map((d, i) => <p key={i} style={{ fontSize: ".82rem", color: "var(--text-dim)", lineHeight: 1.6, textDecoration: "line-through" }}>✗ {d}</p>)}
+        </div>
+      </div>
+
+      {data.risk_flag ? (
+        <div style={{ padding: "16px 20px", borderRadius: "var(--radius)", background: "var(--danger-dim)", borderLeft: "3px solid var(--danger)", marginBottom: 16 }}>
+          <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--danger)", letterSpacing: ".15em", textTransform: "uppercase" as const, marginBottom: 6 }}>RISK FLAG</p>
+          <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.65 }}>{String(data.risk_flag)}</p>
+        </div>
+      ) : null}
+
+      {data.one_liner ? (
+        <p style={{ fontSize: ".92rem", color: "var(--text-bright)", fontStyle: "italic", borderLeft: `2px solid ${verdictColor}`, paddingLeft: 16, marginBottom: 16 }}>
+          {String(data.one_liner)}
+        </p>
+      ) : null}
+
+      <p style={{ fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--text-dim)", marginTop: 12 }}>
+        {String(data.disclaimer || "AI-generated analysis only. Verify with current sources before making decisions.")}
+      </p>
+    </div>
+  );
+}
+
+/* ───── main page ───── */
 
 export default function Home() {
   const [apiKey, setApiKey] = useState("");
@@ -353,6 +617,11 @@ export default function Home() {
   );
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [captureEmail, setCaptureEmail] = useState("");
+  const [optIn, setOptIn] = useState(true);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const runPipeline = async () => {
     if (!query.trim() || !apiKey.trim()) return;
@@ -405,10 +674,7 @@ export default function Home() {
             setAgentStates((prev) => {
               const next = [...prev];
               const current = next[event.agentId - 1];
-              next[event.agentId - 1] = {
-                ...current,
-                streamText: current.streamText + event.chunk,
-              };
+              next[event.agentId - 1] = { ...current, streamText: current.streamText + event.chunk };
               return next;
             });
           }
@@ -416,11 +682,7 @@ export default function Home() {
           if (event.type === "agent_complete") {
             setAgentStates((prev) => {
               const next = [...prev];
-              next[event.agentId - 1] = {
-                ...next[event.agentId - 1],
-                status: "complete",
-                data: event.data,
-              };
+              next[event.agentId - 1] = { ...next[event.agentId - 1], status: "complete", data: event.data };
               return next;
             });
           }
@@ -431,35 +693,61 @@ export default function Home() {
             }));
             setLoading(false);
           }
-        } catch {}
+        } catch { /* skip malformed events */ }
       }
     }
   };
 
+  const handleEmailSubmit = async () => {
+    if (!captureEmail.trim() || !captureEmail.includes("@")) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailError("");
+    try {
+      const res = await fetch("/api/capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: captureEmail, query: seedQuery, optIn }),
+      });
+      if (res.ok) {
+        setEmailSent(true);
+      } else {
+        setEmailError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setEmailError("Network error. Please try again.");
+    }
+  };
+
+  const pipelineDone = !loading && agentStates.some((s) => s.status === "complete");
+
   const runningAgentIdx = agentStates.findIndex((s) => s.status === "running");
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-gray-300 font-mono">
-      <div className="max-w-3xl mx-auto px-4 py-10">
+    <main style={{ minHeight: "100vh", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 28px" }}>
 
-        {/* Header */}
-        <div className="mb-8 border-b border-gray-800 pb-6">
-          <p className="text-gray-600 text-xs tracking-[0.2em] uppercase mb-2">
-            5-agent research pipeline · AI-estimated output
-          </p>
-          <h1 className="text-2xl font-bold text-white mb-3">Subject Decision Briefing</h1>
-          <div className="text-xs text-yellow-700 border border-yellow-900/50 rounded p-3 bg-yellow-900/10 space-y-1">
-            <p className="font-bold">⚠ What this tool actually is:</p>
-            <p>Five Claude AI agents reasoning sequentially about your query. No live data. No real job boards. No verified statistics. Training data cutoff early 2025.</p>
-            <p>Treat this as a rough signal, not a source of truth.</p>
+        {/* ─── Header ─── */}
+        <header style={{ padding: "64px 0 40px", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".18em", textTransform: "uppercase" as const, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 20, animation: "fadeUp .6s .2s both" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", boxShadow: "0 0 8px var(--accent-glow)", animation: "pulse 2s infinite", display: "inline-block" }} />
+            7-Agent Pipeline Output
           </div>
-        </div>
+          <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700, color: "var(--text-bright)", letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: 12, animation: "fadeUp .6s .35s both" }}>
+            Subject Decision Briefing
+          </h1>
+          <div style={{ padding: "16px 20px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.65, animation: "fadeUp .6s .5s both" }}>
+            <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em", textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 700 }}>⚠ What this tool actually is</p>
+            <p>Seven Claude AI agents reasoning sequentially about your query. No live data. No real job boards. No verified statistics. Training data cutoff early 2025. Treat this as a rough signal, not a source of truth.</p>
+          </div>
+        </header>
 
-        {/* Input */}
+        {/* ─── Input ─── */}
         {!submitted && (
-          <div className="mb-8 space-y-4">
-            <div className="space-y-2">
-              <label className="text-gray-600 text-xs uppercase tracking-widest block">
+          <div style={{ padding: "40px 0", animation: "fadeUp .5s .6s both" }}>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", fontFamily: "var(--mono)", fontSize: ".62rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 8 }}>
                 Anthropic API Key
               </label>
               <input
@@ -467,94 +755,83 @@ export default function Home() {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="sk-ant-..."
-                className="w-full bg-black border border-gray-700 rounded px-4 py-3 text-white placeholder-gray-700 font-mono text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "14px 18px", color: "var(--text-bright)", fontFamily: "var(--mono)", fontSize: ".85rem", outline: "none" }}
               />
-              <p className="text-gray-700 text-xs font-mono">
+              <p style={{ fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--text-dim)", marginTop: 6 }}>
                 Your key is used directly and never stored.{" "}
-                <a
-                  href="https://console.anthropic.com/settings/keys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-500 underline hover:text-gray-300"
-                >
-                  Get a key →
-                </a>
+                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" style={{ color: "var(--text)", textDecoration: "underline" }}>Get a key →</a>
               </p>
-              {authError && (
-                <p className="text-red-500 text-xs font-mono">{authError}</p>
-              )}
+              {authError && <p style={{ fontFamily: "var(--mono)", fontSize: ".75rem", color: "var(--danger)", marginTop: 6 }}>{authError}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-gray-600 text-xs uppercase tracking-widest block">Query</label>
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontFamily: "var(--mono)", fontSize: ".62rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 8 }}>
+                Query
+              </label>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runPipeline()}
                 placeholder="e.g. Is data science worth it in 2028"
-                className="w-full bg-black border border-gray-700 rounded px-4 py-3 text-white placeholder-gray-700 font-mono text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "14px 18px", color: "var(--text-bright)", fontFamily: "var(--sans)", fontSize: ".9rem", outline: "none" }}
               />
             </div>
 
             <button
               onClick={runPipeline}
               disabled={!query.trim() || !apiKey.trim()}
-              className="w-full border border-gray-700 text-gray-300 font-mono py-3 rounded text-sm tracking-widest hover:border-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              style={{
+                width: "100%",
+                padding: "14px 0",
+                borderRadius: "var(--radius)",
+                border: "1px solid var(--accent)",
+                background: "var(--accent-dim)",
+                color: "var(--accent)",
+                fontFamily: "var(--mono)",
+                fontSize: ".82rem",
+                letterSpacing: ".12em",
+                cursor: query.trim() && apiKey.trim() ? "pointer" : "not-allowed",
+                opacity: query.trim() && apiKey.trim() ? 1 : 0.3,
+                transition: "all .3s ease",
+              }}
             >
               RUN PIPELINE →
             </button>
           </div>
         )}
 
+        {/* ─── Pipeline Running ─── */}
         {submitted && (
           <>
             {/* Status bar */}
-            <div className="flex justify-between items-center mb-6 text-xs font-mono text-gray-600">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 0", fontFamily: "var(--mono)", fontSize: ".72rem", color: "var(--text-dim)" }}>
               <span>
-                query: <span className="text-gray-400">&apos;{seedQuery}&apos;</span>
+                query: <span style={{ color: "var(--text)" }}>&apos;{seedQuery}&apos;</span>
               </span>
               <span>
                 {loading ? (
-                  <span className="text-yellow-600">
-                    running agent {runningAgentIdx + 1}/{AGENTS.length}...
-                  </span>
+                  <span style={{ color: "var(--warn)" }}>running agent {runningAgentIdx + 1}/{AGENTS.length}...</span>
                 ) : executedAt ? (
-                  <span className="text-gray-600">completed {executedAt}</span>
+                  <span>completed {executedAt}</span>
                 ) : null}
               </span>
             </div>
 
-            {/* Pipeline status row */}
-            <div className="flex items-center gap-2 mb-8 text-xs font-mono overflow-x-auto pb-2">
-              {AGENTS.map((agent, i) => {
-                const s = agentStates[i].status;
-                return (
-                  <div key={agent.id} className="flex items-center gap-2 shrink-0">
-                    <div className="flex items-center gap-1.5">
-                      <div className={`w-2 h-2 rounded-full ${
-                        s === "complete" ? "bg-gray-500" :
-                        s === "running" ? "bg-yellow-500 animate-pulse" :
-                        "bg-gray-800"
-                      }`} />
-                      <span className={
-                        s === "complete" ? "text-gray-500" :
-                        s === "running" ? "text-yellow-600" :
-                        "text-gray-700"
-                      }>
-                        {String(agent.id).padStart(2, "0")}_{agent.name.replace(" ", "_")}
-                      </span>
-                    </div>
-                    {i < AGENTS.length - 1 && (
-                      <span className="text-gray-800">→</span>
-                    )}
-                  </div>
-                );
-              })}
+            {/* Pipeline visualization */}
+            <div style={{ display: "flex", alignItems: "center", padding: "0 0 32px", overflowX: "auto", borderBottom: "1px solid var(--border)", marginBottom: 32 }}>
+              {AGENTS.map((agent, i) => (
+                <div key={agent.id} style={{ display: "contents" }}>
+                  <PipelineNode agent={agent} status={agentStates[i].status} />
+                  {i < AGENTS.length - 1 && (
+                    <PipelineConnector active={agentStates[i].status === "complete"} />
+                  )}
+                </div>
+              ))}
             </div>
 
-            {/* Agent cards — show all, including idle ones so user sees the full pipeline */}
-            <div className="space-y-4">
+            {/* Agent cards */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingBottom: 40 }}>
               {AGENTS.map((agent) => {
                 const state = agentStates[agent.id - 1];
                 if (state.status === "idle") return null;
@@ -572,19 +849,191 @@ export default function Home() {
 
             {/* Reset */}
             {!loading && (
-              <button
-                onClick={() => {
-                  setSubmitted(false);
-                  setQuery("");
-                  setAgentStates(AGENTS.map(() => ({ status: "idle", data: null, streamText: "" })));
-                }}
-                className="mt-8 text-gray-700 text-xs font-mono hover:text-gray-400 transition-colors tracking-widest uppercase"
-              >
-                ← new query
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40, paddingTop: 8 }}>
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setQuery("");
+                    setShowEmailForm(false);
+                    setEmailSent(false);
+                    setCaptureEmail("");
+                    setAgentStates(AGENTS.map(() => ({ status: "idle", data: null, streamText: "" })));
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontFamily: "var(--mono)",
+                    fontSize: ".72rem",
+                    color: "var(--text-dim)",
+                    letterSpacing: ".12em",
+                    textTransform: "uppercase" as const,
+                    cursor: "pointer",
+                    padding: "12px 0",
+                  }}
+                >
+                  ← new query
+                </button>
+              </div>
+            )}
+
+            {/* Download CTA */}
+            {pipelineDone && submitted && !showEmailForm && !emailSent && (
+              <div style={{
+                padding: "32px 36px",
+                borderRadius: "var(--radius)",
+                background: "var(--surface-raised)",
+                border: "1px solid var(--border-accent)",
+                borderLeft: "4px solid var(--accent)",
+                marginBottom: 32,
+                animation: "fadeUp .5s both",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                  <span style={{ fontSize: "1.2rem" }}>📩</span>
+                  <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-bright)", margin: 0 }}>
+                    Get this briefing in your inbox
+                  </h3>
+                </div>
+                <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6, marginBottom: 20 }}>
+                  We&apos;ll send you a clean copy of this career briefing plus a downloadable PDF — so you can reference it when making your decision.
+                </p>
+                <button
+                  onClick={() => setShowEmailForm(true)}
+                  style={{
+                    padding: "12px 28px",
+                    borderRadius: "var(--radius)",
+                    border: "1px solid var(--accent)",
+                    background: "var(--accent-dim)",
+                    color: "var(--accent)",
+                    fontFamily: "var(--mono)",
+                    fontSize: ".8rem",
+                    letterSpacing: ".08em",
+                    cursor: "pointer",
+                    transition: "all .3s ease",
+                  }}
+                >
+                  SEND ME THE BRIEFING →
+                </button>
+              </div>
+            )}
+
+            {/* Email Form */}
+            {showEmailForm && !emailSent && (
+              <div style={{
+                padding: "32px 36px",
+                borderRadius: "var(--radius)",
+                background: "var(--surface-raised)",
+                border: "1px solid var(--border-accent)",
+                borderLeft: "4px solid var(--accent)",
+                marginBottom: 32,
+                animation: "fadeUp .4s both",
+              }}>
+                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-bright)", marginBottom: 20 }}>
+                  Where should we send it?
+                </h3>
+
+                <div style={{ marginBottom: 16 }}>
+                  <input
+                    type="email"
+                    value={captureEmail}
+                    onChange={(e) => setCaptureEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleEmailSubmit()}
+                    placeholder="you@email.com"
+                    style={{
+                      width: "100%",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "var(--radius)",
+                      padding: "14px 18px",
+                      color: "var(--text-bright)",
+                      fontFamily: "var(--sans)",
+                      fontSize: ".9rem",
+                      outline: "none",
+                    }}
+                  />
+                  {emailError && (
+                    <p style={{ fontFamily: "var(--mono)", fontSize: ".72rem", color: "var(--danger)", marginTop: 6 }}>{emailError}</p>
+                  )}
+                </div>
+
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 20 }}>
+                  <input
+                    type="checkbox"
+                    checked={optIn}
+                    onChange={(e) => setOptIn(e.target.checked)}
+                    style={{ marginTop: 3, accentColor: "var(--accent)" }}
+                  />
+                  <span style={{ fontSize: ".78rem", color: "var(--text-dim)", lineHeight: 1.5 }}>
+                    Send me weekly career intelligence updates — field-specific signals on job market shifts, AI disruption risks, and emerging opportunities. Unsubscribe anytime.
+                  </span>
+                </label>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <button
+                    onClick={handleEmailSubmit}
+                    style={{
+                      padding: "12px 28px",
+                      borderRadius: "var(--radius)",
+                      border: "none",
+                      background: "var(--accent)",
+                      color: "var(--bg)",
+                      fontFamily: "var(--mono)",
+                      fontSize: ".8rem",
+                      fontWeight: 700,
+                      letterSpacing: ".06em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    SEND BRIEFING
+                  </button>
+                  <button
+                    onClick={() => setShowEmailForm(false)}
+                    style={{
+                      padding: "12px 16px",
+                      borderRadius: "var(--radius)",
+                      border: "1px solid var(--border)",
+                      background: "none",
+                      color: "var(--text-dim)",
+                      fontFamily: "var(--mono)",
+                      fontSize: ".72rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Email Success */}
+            {emailSent && (
+              <div style={{
+                padding: "28px 32px",
+                borderRadius: "var(--radius)",
+                background: "rgba(34,197,94,.08)",
+                border: "1px solid rgba(34,197,94,.25)",
+                borderLeft: "4px solid var(--grow)",
+                marginBottom: 32,
+                animation: "fadeUp .4s both",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <span style={{ fontSize: "1.1rem" }}>✓</span>
+                  <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--grow)", margin: 0 }}>
+                    Briefing sent
+                  </h3>
+                </div>
+                <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6 }}>
+                  Check your inbox at <span style={{ fontFamily: "var(--mono)", color: "var(--text-bright)" }}>{captureEmail}</span>.
+                  {optIn && " You'll also receive weekly career intelligence updates."}
+                </p>
+              </div>
             )}
           </>
         )}
+
+        {/* Footer */}
+        <footer style={{ padding: "36px 0 48px", fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--text-dim)", textAlign: "center", lineHeight: 1.7, letterSpacing: ".02em", borderTop: "1px solid var(--border)" }}>
+          Pipeline executed in 7 stages. This briefing is AI-estimated — verify with current sources before making decisions.
+        </footer>
       </div>
     </main>
   );
