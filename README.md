@@ -38,9 +38,7 @@ Every output includes:
 
 ## Why it looks like this
 
-Most AI tools dress uncertainty up as confidence. This one doesn't.
-
-The design is intentionally raw — terminal aesthetic, ASCII score bars, yellow warning boxes for caveats, red boxes for risk flags. The visual language matches the epistemic honesty of the outputs. If the AI is guessing, it says so, and the UI makes that visible.
+The design is terminal aesthetic, ASCII score bars, yellow warning boxes for caveats, red boxes for risk flags. The visual language matches the epistemic honesty of the outputs. If the AI is guessing, it says so, and the UI makes that visible.
 
 ---
 
@@ -146,7 +144,7 @@ This is a reasoning tool, not a data aggregator. It's upfront that everything is
 
 ## Built by
 
-[@TheAIMum](https://github.com/YOUR_USERNAME) — solo operator experimenting with multi-agent AI pipelines for practical research problems.
+[@Deb599](https://github.com/deb599) — solo operator experimenting with multi-agent AI pipelines for practical research problems.
 
 ---
 
