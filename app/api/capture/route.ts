@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-const LEADS_FILE = path.join(process.cwd(), "leads.json");
+// Use /tmp on Vercel (serverless has read-only filesystem except /tmp)
+const LEADS_FILE = path.join("/tmp", "leads.json");
 
 interface Lead {
   email: string;
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
       capturedAt: new Date().toISOString(),
     };
 
-    // Store lead locally (replace with your email service: Resend, SendGrid, Mailchimp, etc.)
+    // Store lead to /tmp (temporary — data does not persist across Vercel cold starts)
+    // Replace with a persistent service: Resend, SendGrid, Mailchimp, Supabase, etc.
     const leads = await readLeads();
     leads.push(lead);
     await writeLeads(leads);
@@ -50,8 +52,11 @@ export async function POST(req: Request) {
     // Example with Mailchimp:
     //   if (optIn) await mailchimp.lists.addListMember(LIST_ID, { email_address: email, status: 'subscribed' });
 
+    console.log("Lead captured:", lead);
+
     return NextResponse.json({ success: true });
   } catch (err) {
+    console.error("Capture error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
