@@ -1,62 +1,58 @@
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { Resend } from "resend";
 
-// Use /tmp on Vercel (serverless has read-only filesystem except /tmp)
-const LEADS_FILE = path.join("/tmp", "leads.json");
-
-interface Lead {
-  email: string;
-  query: string;
-  optIn: boolean;
-  capturedAt: string;
-}
-
-async function readLeads(): Promise<Lead[]> {
-  try {
-    const data = await fs.readFile(LEADS_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function writeLeads(leads: Lead[]) {
-  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2));
-}
+// Initialize Resend with your API key from .env.local
+const resend = new Resend(process.env.re_j8DVsone_AD15CypkEv2HNtmEDtQaXqrb);
 
 export async function POST(req: Request) {
   try {
     const { email, query, optIn } = await req.json();
 
+    // 1. Basic Validation
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
 
-    const lead: Lead = {
-      email: email.trim().toLowerCase(),
-      query: String(query || ""),
-      optIn: Boolean(optIn),
-      capturedAt: new Date().toISOString(),
-    };
+    // 2. Prepare the payload
+    const userEmail = email.trim().toLowerCase();
+    const userQuery = String(query || "No specific query provided");
 
-    // Store lead to /tmp (temporary — data does not persist across Vercel cold starts)
-    // Replace with a persistent service: Resend, SendGrid, Mailchimp, Supabase, etc.
-    const leads = await readLeads();
-    leads.push(lead);
-    await writeLeads(leads);
+    // 3. Send the Email via Resend
+    // NOTE: Use 'onboarding@resend.dev' if you haven't verified a custom domain yet.
+    const { data, error } = await resend.emails.send({
+      from: "Briefing Bot <onboarding@resend.dev>", 
+      to: [userEmail],
+      subject: "Your Intelligence Briefing is Ready",
+      html: `
+        <div style="font-family: sans-serif; line-height: 1.5; color: #1c1c1e;">
+          <h2>Briefing Confirmed</h2>
+          <p>Thank you for reaching out. We've received your query:</p>
+          <blockquote style="border-left: 4px solid #ffd60a; padding-left: 15px; font-style: italic;">
+            "${userQuery}"
+          </blockquote>
+          <p>Our agents are processing your request now. You'll receive the full analysis shortly.</p>
+          ${optIn ? `<p style="font-size: 0.8em; color: #666;">You are receiving this because you opted into our newsletter.</p>` : ''}
+        </div>
+      `,
+    });
 
-    // TODO: Connect your email service here
-    // Example with Resend:
-    //   await resend.emails.send({ from: '...', to: email, subject: 'Your Career Briefing', html: '...' });
-    // Example with Mailchimp:
-    //   if (optIn) await mailchimp.lists.addListMember(LIST_ID, { email_address: email, status: 'subscribed' });
+    if (error) {
+      console.error("Resend API Error:", error);
+      return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+    }
 
-    console.log("Lead captured:", lead);
+    // 4. Handle Newsletter Opt-in (Optional)
+    // If you've set up an Audience in Resend, you'd add the contact here.
+    if (optIn) {
+      console.log(`User ${userEmail} requested newsletter opt-in.`);
+    }
 
-    return NextResponse.json({ success: true });
+    console.log("Lead captured and email sent:", data?.id);
+
+    return NextResponse.json({ success: true, id: data?.id });
+    
   } catch (err) {
-    console.error("Capture error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Capture route error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
