@@ -728,14 +728,14 @@ export default function Home() {
         <header style={{ padding: "64px 0 40px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".18em", textTransform: "uppercase" as const, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 20, animation: "fadeUp .6s .2s both" }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", boxShadow: "0 0 8px var(--accent-glow)", animation: "pulse 2s infinite", display: "inline-block" }} />
-            7-Agent Pipeline Output
+            6-Agent Pipeline Output
           </div>
           <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700, color: "var(--text-bright)", letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: 12, animation: "fadeUp .6s .35s both" }}>
             Subject Decision Briefing
           </h1>
           <div style={{ padding: "16px 20px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.65, animation: "fadeUp .6s .5s both" }}>
             <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em", textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 700 }}>⚠ What this tool actually is</p>
-            <p>Seven Claude AI agents reasoning sequentially about your query. No live data. No real job boards. No verified statistics. Training data cutoff early 2025. Treat this as a rough signal, not a source of truth.</p>
+            <p>Six Claude AI agents reasoning sequentially about your query. No live data. No real job boards. No verified statistics. Training data cutoff early 2025. Treat this as a rough signal, not a source of truth.</p>
           </div>
         </header>
 
