@@ -700,13 +700,13 @@ export default function Home() {
     }
     setEmailError("");
 
-    // Collect completed agent outputs to include in the email
-    const briefingText = agentStates
+    // Build fullAnalysis in the ## Section format expected by BriefingDocument
+    const fullAnalysis = agentStates
       .map((s, i) => {
         if (s.status !== "complete") return null;
         const name = AGENTS[i]?.name ?? `Agent ${i + 1}`;
         const text = s.streamText?.trim();
-        return text ? `=== ${name} ===\n${text}` : null;
+        return text ? `## ${name}\n${text}` : null;
       })
       .filter(Boolean)
       .join("\n\n");
@@ -715,7 +715,7 @@ export default function Home() {
       const res = await fetch("/api/capture", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: captureEmail, query: seedQuery, optIn, briefingText }),
+        body: JSON.stringify({ email: captureEmail, query: seedQuery, optIn, fullAnalysis }),
       });
       if (res.ok) {
         setEmailSent(true);

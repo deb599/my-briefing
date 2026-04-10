@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { ReactElement } from "react";
+import { BriefingDocument } from "@/components/BriefingDocument";
 
 export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -11,22 +14,22 @@ export async function POST(req: Request) {
   const resend = new Resend(apiKey);
 
   try {
-    const { email, query, optIn, briefingText } = await req.json();
+    const { email, query, optIn, fullAnalysis } = await req.json();
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
+    if (!fullAnalysis) {
+      return NextResponse.json({ error: "Missing briefing content" }, { status: 400 });
+    }
 
     const userEmail = email.trim().toLowerCase();
     const userQuery = String(query || "No specific query provided");
-    const briefingSummary = briefingText
-      ? `<hr style="border:none;border-top:1px solid #ddd;margin:24px 0"/>
-         <h3 style="font-size:1rem;margin-bottom:12px">Your Briefing Summary</h3>
-         <pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;line-height:1.6;color:#444;background:#f8f8f8;padding:16px;border-radius:6px">${briefingText
-           .replace(/&/g, "&amp;")
-           .replace(/</g, "&lt;")
-           .replace(/>/g, "&gt;")}</pre>`
-      : "";
+
+    // Generate the PDF
+    const pdfBuffer = await renderToBuffer(
+      BriefingDocument({ query: userQuery, analysis: fullAnalysis }) as ReactElement
+    );
 
     const { data, error } = await resend.emails.send({
       // IMPORTANT: Replace with your verified Resend sender domain once set up.
@@ -37,19 +40,21 @@ export async function POST(req: Request) {
       to: [userEmail],
       subject: `Your Intelligence Briefing: "${userQuery}"`,
       html: `
-        <div style="font-family:sans-serif;line-height:1.6;color:#1c1c1e;max-width:640px;margin:0 auto">
-          <h2 style="font-size:1.3rem;margin-bottom:8px">Briefing Confirmed</h2>
-          <p>Here is the 7-agent intelligence briefing for your query:</p>
-          <blockquote style="border-left:4px solid #ffd60a;padding:8px 16px;margin:16px 0;font-style:italic;color:#555">
-            ${userQuery}
-          </blockquote>
-          ${briefingSummary}
-          <p style="font-size:.78rem;color:#999;margin-top:32px">
-            AI-generated analysis only. Verify with current sources before making decisions.
-            ${optIn ? " | You opted into the AI Watcher newsletter." : ""}
-          </p>
+        <div style="font-family:sans-serif;line-height:1.6;color:#1C1C1E;max-width:640px;margin:0 auto">
+          <h2>Briefing Confirmed</h2>
+          <p>The 7-agent analysis for <strong>"${userQuery}"</strong> is complete.</p>
+          <p>Please find your full Intelligence Briefing attached as a PDF.</p>
+          <hr style="border:1px solid #FFD60A" />
+          <small style="color:#999">AI Automation Mum // Strategic Intelligence</small>
+          ${optIn ? `<p style="font-size:.78rem;color:#999;margin-top:16px">You opted into the AI Watcher newsletter.</p>` : ""}
         </div>
       `,
+      attachments: [
+        {
+          filename: `Briefing_${userQuery.replace(/\s+/g, "_")}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
     });
 
     if (error) {
@@ -65,7 +70,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, id: data?.id });
 
   } catch (err) {
-    console.error("Capture route error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("PDF/Email Error:", err);
+    return NextResponse.json({ error: "Failed to generate or send PDF" }, { status: 500 });
   }
 }
