@@ -699,16 +699,31 @@ export default function Home() {
       return;
     }
     setEmailError("");
+
+    // Collect completed agent outputs to include in the email
+    const briefingText = agentStates
+      .map((s, i) => {
+        if (s.status !== "complete") return null;
+        const name = AGENTS[i]?.name ?? `Agent ${i + 1}`;
+        const text = s.streamText?.trim();
+        return text ? `=== ${name} ===\n${text}` : null;
+      })
+      .filter(Boolean)
+      .join("\n\n");
+
     try {
       const res = await fetch("/api/capture", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: captureEmail, query: seedQuery, optIn }),
+        body: JSON.stringify({ email: captureEmail, query: seedQuery, optIn, briefingText }),
       });
       if (res.ok) {
         setEmailSent(true);
       } else {
-        setEmailError("Something went wrong. Please try again.");
+        const body = await res.json().catch(() => ({}));
+        setEmailError(body.error === "Email service not configured"
+          ? "Email service not configured. Please contact the site owner."
+          : "Something went wrong. Please try again.");
       }
     } catch {
       setEmailError("Network error. Please try again.");
