@@ -7,8 +7,9 @@ const AGENTS = [
   { id: 2, name: "Job Market Scanner" },
   { id: 3, name: "Career Path Mapper" },
   { id: 4, name: "Future-Proofing Checker" },
-  { id: 5, name: "AI Bottleneck Analyzer" },
-  { id: 6, name: "Final Briefing" },
+  { id: 5, name: "Decision Brief" },
+  { id: 6, name: "AI Bottleneck Analyzer" },
+  { id: 7, name: "Final Briefing" },
 ];
 
 type AgentStatus = "idle" | "running" | "complete" | "error";
@@ -251,11 +252,14 @@ function AgentCard({ agentId, data, streamText, status }: {
           {/* Agent 4: Future-Proofing */}
           {agentId === 4 && renderAgent4(data)}
 
-          {/* Agent 5: AI Bottleneck */}
-          {agentId === 5 && renderAgent5(data)}
+          {/* Agent 5: Decision Brief */}
+          {agentId === 5 && renderAgent6(data)}
 
-          {/* Agent 6: Final Briefing */}
-          {agentId === 6 && renderAgent6(data)}
+          {/* Agent 6: AI Bottleneck */}
+          {agentId === 6 && renderAgent5(data)}
+
+          {/* Agent 7: Final Briefing */}
+          {agentId === 7 && renderAgent6(data)}
         </div>
       )}
     </div>
@@ -296,7 +300,7 @@ function renderAgent1(data: Record<string, unknown>) {
 function renderAgent2(data: Record<string, unknown>) {
   const roles = (data.top_roles as string[]) || [];
   const industries = (data.top_industries as string[]) || [];
-  const salary = (data as any).salary_range as Record<string, unknown> | undefined;
+  const salary = data.salary_range as Record<string, unknown> | undefined;
   const gaps = (data.data_gaps as string[]) || [];
   return (
     <div>
@@ -886,11 +890,11 @@ export default function Home() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                   <span style={{ fontSize: "1.2rem" }}>📩</span>
                   <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-bright)", margin: 0 }}>
-                    Get this briefing as a PDF
+                    Get this briefing in your inbox
                   </h3>
                 </div>
                 <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6, marginBottom: 20 }}>
-                  We&apos;ll send you a clean PDF of this career briefing — so you can reference it offline when making your decision.
+                  We&apos;ll send you a clean copy of this career briefing plus a downloadable PDF — so you can reference it when making your decision.
                 </p>
                 <button
                   onClick={() => setShowEmailForm(true)}
@@ -907,7 +911,7 @@ export default function Home() {
                     transition: "all .3s ease",
                   }}
                 >
-                  SEND ME THE PDF →
+                  SEND ME THE BRIEFING →
                 </button>
               </div>
             )}
@@ -924,7 +928,7 @@ export default function Home() {
                 animation: "fadeUp .4s both",
               }}>
                 <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-bright)", marginBottom: 20 }}>
-                  Where should we send the PDF?
+                  Where should we send it?
                 </h3>
 
                 <div style={{ marginBottom: 16 }}>
@@ -959,7 +963,7 @@ export default function Home() {
                     style={{ marginTop: 3, accentColor: "var(--accent)" }}
                   />
                   <span style={{ fontSize: ".78rem", color: "var(--text-dim)", lineHeight: 1.5 }}>
-                    Also subscribe me to the <strong style={{ color: "var(--text)" }}>AI Watcher</strong> newsletter — weekly signals on how AI is reshaping careers, industries, and hiring. Delivered on LinkedIn. Unsubscribe anytime.
+                    Send me weekly career intelligence updates — field-specific signals on job market shifts, AI disruption risks, and emerging opportunities. Unsubscribe anytime.
                   </span>
                 </label>
 
@@ -979,7 +983,7 @@ export default function Home() {
                       cursor: "pointer",
                     }}
                   >
-                    SEND PDF
+                    SEND BRIEFING
                   </button>
                   <button
                     onClick={() => setShowEmailForm(false)}
@@ -1014,14 +1018,12 @@ export default function Home() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <span style={{ fontSize: "1.1rem" }}>✓</span>
                   <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--grow)", margin: 0 }}>
-                    PDF on its way
+                    Briefing sent
                   </h3>
                 </div>
                 <p style={{ fontSize: ".84rem", color: "var(--text)", lineHeight: 1.6 }}>
                   Check your inbox at <span style={{ fontFamily: "var(--mono)", color: "var(--text-bright)" }}>{captureEmail}</span>.
-                  {optIn && (
-                    <span> To complete your AI Watcher subscription, <a href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7384456045533888512" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>follow the newsletter on LinkedIn</a>.</span>
-                  )}
+                  {optIn && " You'll also receive weekly career intelligence updates."}
                 </p>
               </div>
             )}
@@ -1030,7 +1032,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer style={{ padding: "36px 0 48px", fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--text-dim)", textAlign: "center", lineHeight: 1.7, letterSpacing: ".02em", borderTop: "1px solid var(--border)" }}>
-          Pipeline executed in 6 stages. This briefing is AI-estimated — verify with current sources before making decisions.
+          Pipeline executed in 7 stages. This briefing is AI-estimated — verify with current sources before making decisions.
         </footer>
       </div>
     </main>

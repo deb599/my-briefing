@@ -1,6 +1,6 @@
-# Subject Decision Briefing — 6-Agent AI Pipeline
+# Subject Decision Briefing — 7-Agent AI Pipeline
 
-A brutally honest career and subject research tool. Type any query — "Is data science worth it in 2028", "Should I study nursing or software engineering" — and six Claude AI agents run sequentially, each building on the last, to give you a grounded, uncertainty-aware briefing.
+A brutally honest career and subject research tool. Type any query — "Is data science worth it in 2028", "Should I study nursing or software engineering" — and seven Claude AI agents run sequentially, each building on the last, to give you a grounded, uncertainty-aware briefing.
 
 **No sugar-coating. No hallucinated confidence. Just AI reasoning that tells you what it knows, what it's extrapolating, and where it's guessing.**
 
@@ -18,7 +18,7 @@ Get a key at [console.anthropic.com](https://console.anthropic.com/settings/keys
 
 ## What it does
 
-Runs 6 AI agents in sequence. Each agent reads the previous agents' outputs before responding:
+Runs 7 AI agents in sequence. Each agent reads the previous agents' outputs before responding:
 
 | Agent | Role | What it produces |
 |---|---|---|
@@ -26,8 +26,9 @@ Runs 6 AI agents in sequence. Each agent reads the previous agents' outputs befo
 | 02 · Job Market Scanner | Reads the market | Demand score, top roles, salary ranges, hiring trend |
 | 03 · Career Path Mapper | Maps the routes | Recommended subject combos, career paths, entry points |
 | 04 · Future-Proofing Checker | Stress-tests the bet | AI disruption risk, 5-year outlook, safe bets vs. avoid |
-| 05 · AI Bottleneck Analyzer | Finds the friction | AI-caused bottlenecks, pain points, skill atrophy risks, hiring impact |
-| 06 · Final Briefing | Calls the verdict | GO / CAUTION / AVOID with confidence score, risk flag, and bottleneck-aware recommendation |
+| 05 · Decision Brief | Calls an interim verdict | GO / CAUTION / AVOID with confidence score and risk flag |
+| 06 · AI Bottleneck Analyzer | Exposes the friction | Bottlenecks, pain points, skill atrophy risk, hiring impact |
+| 07 · Final Briefing | Final verdict | Synthesises all 6 agents into a definitive recommendation |
 
 Every output includes:
 - Confidence ranges, not false precision
@@ -37,24 +38,26 @@ Every output includes:
 
 ---
 
-## Lead capture
+## Email lead capture
 
-After the pipeline completes, users can enter their email to receive their briefing and optionally opt in for weekly career intelligence updates. The capture endpoint stores leads locally to `leads.json` — swap in your preferred email service (Resend, SendGrid, Mailchimp) via the TODO hooks in `app/api/capture/route.ts`.
+When the pipeline completes, users can submit their email to receive a copy of the briefing. Leads are stored locally in `leads.json` (gitignored). To connect a real email service, edit `app/api/capture/route.ts` — the TODOs for Resend, SendGrid, and Mailchimp are already stubbed in.
 
 ---
 
-## Design
+## Why it looks like this
 
-The UI is styled as an intelligence briefing — dark blue-black background, teal accent highlights, monospace labels, and a visual pipeline diagram showing each agent's completion status in real time. Warning boxes for caveats, red flags for risks, and score bars that make uncertainty visible at a glance.
+Most AI tools dress uncertainty up as confidence. This one doesn't.
+
+The design is intentionally raw — dark terminal aesthetic, animated score bars, glowing pipeline nodes, yellow warning boxes for caveats, red boxes for risk flags. The visual language matches the epistemic honesty of the outputs. If the AI is guessing, it says so, and the UI makes that visible.
 
 ---
 
 ## Tech stack
 
-- **Next.js 16** (App Router, TypeScript strict mode)
+- **Next.js 16** (App Router)
 - **Anthropic Claude claude-opus-4-6** via `@anthropic-ai/sdk`
 - **Server-Sent Events** for real-time streaming — you watch each agent's raw output as Claude writes it, then see the parsed result card when it's done
-- **CSS custom properties** (dark intelligence briefing theme)
+- **CSS custom properties** (dark theme with teal accent, CSS variables throughout)
 - **Vercel** for deployment
 
 ---
@@ -65,13 +68,28 @@ The UI is styled as an intelligence briefing — dark blue-black background, tea
 User query
     │
     ▼
-Agent 1 (Sentiment) ──► Agent 2 (Job Market) ──► Agent 3 (Career Paths)
-                                                         │
-                                                         ▼
-              Agent 6 (Final Briefing) ◄── Agent 5 (AI Bottlenecks) ◄── Agent 4 (Future-Proof)
+Agent 1 (Sentiment)
+    │
+    ▼
+Agent 2 (Job Market)
+    │
+    ▼
+Agent 3 (Career Paths)
+    │
+    ▼
+Agent 4 (Future-Proofing)
+    │
+    ▼
+Agent 5 (Decision Brief)
+    │
+    ▼
+Agent 6 (AI Bottleneck Analyzer)
+    │
+    ▼
+Agent 7 (Final Briefing) ◄── sees all 6 prior outputs
 ```
 
-Each agent receives the full output of all previous agents as context before it runs. Agent 6 sees everything — including the AI bottleneck analysis — before producing the final recommendation.
+Each agent receives the full output of all previous agents as context before it runs. Agent 7 sees everything.
 
 The API route streams Claude's response token-by-token via SSE. The frontend shows the raw text streaming in real time, then renders the parsed JSON into structured cards when each agent completes.
 
@@ -114,14 +132,14 @@ No environment variables required. Users supply their own API key in the UI.
 
 ```
 app/
-├── page.tsx              # Client UI — input, streaming display, agent cards, email capture
+├── page.tsx              # Client UI — input, pipeline visualisation, agent cards, email capture
 ├── layout.tsx            # Root layout
-├── globals.css           # Dark theme design system (CSS custom properties + animations)
+├── globals.css           # CSS variables, animations, dark theme
 └── api/
     ├── pipeline/
-    │   └── route.ts      # 6-agent SSE stream — prompts, Claude calls, JSON parsing
+    │   └── route.ts      # 7-agent SSE stream — prompts, Claude calls, JSON parsing
     └── capture/
-        └── route.ts      # Email lead capture — stores to leads.json
+        └── route.ts      # Email lead capture — stores to leads.json, stub for email services
 ```
 
 ---
@@ -131,11 +149,11 @@ app/
 **Why BYOK (bring your own key)?**
 The app runs on Claude Opus — not cheap per query. BYOK means you control your own usage and costs. The key is sent in the request body over HTTPS, used in-memory for that request, and never logged or persisted.
 
-**Why not just one Claude call?**
-Sequential agents with context-passing catches contradictions, builds reasoning depth, and makes the uncertainty visible step by step. Agent 6's final recommendation reflects how consistently all five prior agents agreed — not just how confident Claude sounds.
+**Why 7 agents instead of 5?**
+Agent 6 (AI Bottleneck Analyzer) surfaces the specific friction AI is creating in the field — job displacement, skill atrophy, hiring filter changes, credential devaluation. Agent 7 then synthesises all prior agents including that bottleneck analysis into a final verdict. The extra depth catches things a 5-agent run misses.
 
-**Why a dedicated AI Bottleneck agent?**
-Agent 5 (AI Bottleneck Analyzer) identifies the specific friction AI is causing in each field — skill atrophy, hiring filter changes, noise flooding, regulatory uncertainty. Agent 6 then factors those bottlenecks into the final recommendation, producing a more grounded verdict.
+**Why not just one Claude call?**
+Sequential agents with context-passing catches contradictions, builds reasoning depth, and makes the uncertainty visible step by step. The final confidence score reflects how consistently all seven agents agreed — not just how confident Claude sounds.
 
 **Why stream the raw output?**
 Watching the AI reason in real time, including hedges and self-corrections as it writes JSON, is more honest than presenting a polished card after a loading spinner. You see what you're actually getting.
@@ -150,14 +168,14 @@ This is a reasoning tool, not a data aggregator. It's upfront that everything is
 - All data is AI-estimated from training data up to early 2025
 - Salary figures, job volumes, and hiring trends are extrapolations — not live scrapes
 - Future-date queries (2028+) are forecasting exercises, not verified predictions
-- Character and cultural context will affect outputs (tuned for Australian context but broadly applicable)
-- Claude Opus is not cheap. A full 6-agent run costs approximately $0.07–0.18 USD depending on query length
+- Tuned for Australian context (AUD salary ranges) but broadly applicable
+- Claude Opus is not cheap. A full 7-agent run costs approximately $0.10–0.25 USD depending on query length
 
 ---
 
 ## Built by
 
-[@Deb599](https://github.com/deb599) — solo operator experimenting with multi-agent AI pipelines for practical research problems.
+[@TheAIMum](https://github.com/deb599) — solo operator experimenting with multi-agent AI pipelines for practical research problems.
 
 ---
 

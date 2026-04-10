@@ -108,7 +108,30 @@ Return ONLY valid JSON:
 
     5: `${UNCERTAINTY_DISCLAIMER}
 
-You are Agent 5: AI Bottleneck Analyzer (speculative, based on training data patterns).
+You are Agent 5: Decision Summary (synthesised AI opinion, not professional advice).
+Compile findings for: "${query}"
+All prior agent outputs:
+${context}
+
+This is not financial or career advice. Confidence scores reflect AI consistency, not real-world certainty.
+Be direct about what the data supports and what it doesn't.
+
+Return ONLY valid JSON:
+{
+  "recommendation": "<clear 2-sentence recommendation — include key caveat>",
+  "confidence_score": <number 0-10>,
+  "confidence_note": "<why this score is limited — what the AI couldn't verify>",
+  "doors_opened": ["<opportunity1>", "<opportunity2>", "<opportunity3>"],
+  "doors_closed": ["<limitation1>", "<limitation2>"],
+  "risk_flag": "<the single most important risk — be blunt>",
+  "one_liner": "<one direct sentence summing up the verdict, no sugarcoating>",
+  "verdict": "<go|caution|avoid>",
+  "disclaimer": "AI-generated analysis only. Verify with current sources before making decisions."
+}`,
+
+    6: `${UNCERTAINTY_DISCLAIMER}
+
+You are Agent 6: AI Bottleneck Analyzer (speculative, based on training data patterns).
 Identify the specific bottlenecks, pain points, and friction that AI is creating in the field related to: "${query}"
 Prior context:
 ${context}
@@ -141,9 +164,9 @@ Return ONLY valid JSON:
   "data_caveat": "<honest note about speculation level>"
 }`,
 
-    6: `${UNCERTAINTY_DISCLAIMER}
+    7: `${UNCERTAINTY_DISCLAIMER}
 
-You are Agent 6: Final Briefing (synthesised AI opinion, not professional advice).
+You are Agent 7: Final Briefing (synthesised AI opinion, not professional advice). (synthesised AI opinion, not professional advice).
 Compile findings for: "${query}"
 All prior agent outputs:
 ${context}
@@ -186,8 +209,9 @@ export async function POST(req: Request) {
     { id: 2, name: "Job Market Scanner" },
     { id: 3, name: "Career Path Mapper" },
     { id: 4, name: "Future-Proofing Checker" },
-    { id: 5, name: "AI Bottleneck Analyzer" },
-    { id: 6, name: "Final Briefing" },
+    { id: 5, name: "Decision Brief" },
+    { id: 6, name: "AI Bottleneck Analyzer" },
+    { id: 7, name: "Final Briefing" },
   ];
 
   const encoder = new TextEncoder();
