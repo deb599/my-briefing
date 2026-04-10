@@ -296,7 +296,7 @@ function renderAgent1(data: Record<string, unknown>) {
 function renderAgent2(data: Record<string, unknown>) {
   const roles = (data.top_roles as string[]) || [];
   const industries = (data.top_industries as string[]) || [];
-  const salary = data.salary_range as Record<string, unknown> | undefined;
+  const salary = (data as any).salary_range as Record<string, unknown> | undefined;
   const gaps = (data.data_gaps as string[]) || [];
   return (
     <div>
