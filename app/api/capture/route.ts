@@ -1,58 +1,42 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { ReactElement } from "react";
+// You'll create this component in Step 3
+import { BriefingDocument } from "@/components/BriefingDocument"; 
 
-// Initialize Resend with your API key from .env.local
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
     const { email, query, optIn } = await req.json();
 
-    // 1. Basic Validation
-    if (!email || typeof email !== "string" || !email.includes("@")) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-    }
+    // 1. (Placeholder) Run your 7-agent logic here to get the 'fullAnalysis'
+    const fullAnalysis = "This is the deep dive into law in 2028..."; 
 
-    // 2. Prepare the payload
-    const userEmail = email.trim().toLowerCase();
-    const userQuery = String(query || "No specific query provided");
+    // 2. Generate the PDF Buffer
+    const pdfBuffer = await renderToBuffer(
+      BriefingDocument({ query, analysis: fullAnalysis }) as ReactElement
+    );
 
-    // 3. Send the Email via Resend
-    // NOTE: Use 'onboarding@resend.dev' if you haven't verified a custom domain yet.
+    // 3. Send Email with Attachment
     const { data, error } = await resend.emails.send({
-      from: "Briefing Bot <onboarding@resend.dev>", 
-      to: [userEmail],
-      subject: "Your Intelligence Briefing is Ready",
-      html: `
-        <div style="font-family: sans-serif; line-height: 1.5; color: #1c1c1e;">
-          <h2>Briefing Confirmed</h2>
-          <p>Thank you for reaching out. We've received your query:</p>
-          <blockquote style="border-left: 4px solid #ffd60a; padding-left: 15px; font-style: italic;">
-            "${userQuery}"
-          </blockquote>
-          <p>Our agents are processing your request now. You'll receive the full analysis shortly.</p>
-          ${optIn ? `<p style="font-size: 0.8em; color: #666;">You are receiving this because you opted into our newsletter.</p>` : ''}
-        </div>
-      `,
+      from: "Briefing Bot <onboarding@resend.dev>",
+      to: [email],
+      subject: "Your 2028 Legal Intelligence Briefing (PDF)",
+      html: `<p>Your requested analysis for <strong>"${query}"</strong> is attached as a PDF.</p>`,
+      attachments: [
+        {
+          filename: "Intelligence_Briefing.pdf",
+          content: pdfBuffer,
+        },
+      ],
     });
 
-    if (error) {
-      console.error("Resend API Error:", error);
-      return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
-    }
+    if (error) return NextResponse.json({ error }, { status: 500 });
 
-    // 4. Handle Newsletter Opt-in (Optional)
-    // If you've set up an Audience in Resend, you'd add the contact here.
-    if (optIn) {
-      console.log(`User ${userEmail} requested newsletter opt-in.`);
-    }
-
-    console.log("Lead captured and email sent:", data?.id);
-
-    return NextResponse.json({ success: true, id: data?.id });
-    
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Capture route error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
