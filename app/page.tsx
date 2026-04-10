@@ -296,7 +296,7 @@ function renderAgent1(data: Record<string, unknown>) {
 function renderAgent2(data: Record<string, unknown>) {
   const roles = (data.top_roles as string[]) || [];
   const industries = (data.top_industries as string[]) || [];
-  const salary = data.salary_range as Record<string, unknown> | undefined;
+  const salary = (data as any).salary_range as Record<string, unknown> | undefined;
   const gaps = (data.data_gaps as string[]) || [];
   return (
     <div>
@@ -603,7 +603,6 @@ function renderAgent6(data: Record<string, unknown>) {
 /* ───── main page ───── */
 
 export default function Home() {
-  const [apiKey, setApiKey] = useState("");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [seedQuery, setSeedQuery] = useState("");
@@ -612,7 +611,7 @@ export default function Home() {
     AGENTS.map(() => ({ status: "idle", data: null, streamText: "" }))
   );
   const [loading, setLoading] = useState(false);
-  const [authError, setAuthError] = useState("");
+  const [rateLimitError, setRateLimitError] = useState("");
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [captureEmail, setCaptureEmail] = useState("");
   const [optIn, setOptIn] = useState(true);
@@ -620,8 +619,8 @@ export default function Home() {
   const [emailError, setEmailError] = useState("");
 
   const runPipeline = async () => {
-    if (!query.trim() || !apiKey.trim()) return;
-    setAuthError("");
+    if (!query.trim()) return;
+    setRateLimitError("");
     setLoading(true);
     setSeedQuery(query);
     setSubmitted(true);
@@ -630,11 +629,11 @@ export default function Home() {
     const res = await fetch("/api/pipeline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, apiKey }),
+      body: JSON.stringify({ query }),
     });
 
-    if (res.status === 401) {
-      setAuthError("Invalid API key. Get yours at console.anthropic.com");
+    if (res.status === 429) {
+      setRateLimitError("Daily limit reached (3 runs/day). Try again tomorrow.");
       setLoading(false);
       setSubmitted(false);
       return;
@@ -728,38 +727,20 @@ export default function Home() {
         <header style={{ padding: "64px 0 40px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".18em", textTransform: "uppercase" as const, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 20, animation: "fadeUp .6s .2s both" }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", boxShadow: "0 0 8px var(--accent-glow)", animation: "pulse 2s infinite", display: "inline-block" }} />
-            6-Agent Pipeline Output
+            7-Agent Pipeline Output
           </div>
           <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700, color: "var(--text-bright)", letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: 12, animation: "fadeUp .6s .35s both" }}>
             Subject Decision Briefing
           </h1>
           <div style={{ padding: "16px 20px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.65, animation: "fadeUp .6s .5s both" }}>
             <p style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em", textTransform: "uppercase" as const, marginBottom: 6, fontWeight: 700 }}>⚠ What this tool actually is</p>
-            <p>Six Claude AI agents reasoning sequentially about your query. No live data. No real job boards. No verified statistics. Training data cutoff early 2025. Treat this as a rough signal, not a source of truth.</p>
+            <p>Seven Claude AI agents reasoning sequentially about your query. No live data. No real job boards. No verified statistics. Training data cutoff early 2025. Treat this as a rough signal, not a source of truth.</p>
           </div>
         </header>
 
         {/* ─── Input ─── */}
         {!submitted && (
           <div style={{ padding: "40px 0", animation: "fadeUp .5s .6s both" }}>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: "block", fontFamily: "var(--mono)", fontSize: ".62rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 8 }}>
-                Anthropic API Key
-              </label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-ant-..."
-                style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "14px 18px", color: "var(--text-bright)", fontFamily: "var(--mono)", fontSize: ".85rem", outline: "none" }}
-              />
-              <p style={{ fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--text-dim)", marginTop: 6 }}>
-                Your key is used directly and never stored.{" "}
-                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" style={{ color: "var(--text)", textDecoration: "underline" }}>Get a key →</a>
-              </p>
-              {authError && <p style={{ fontFamily: "var(--mono)", fontSize: ".75rem", color: "var(--danger)", marginTop: 6 }}>{authError}</p>}
-            </div>
-
             <div style={{ marginBottom: 24 }}>
               <label style={{ display: "block", fontFamily: "var(--mono)", fontSize: ".62rem", letterSpacing: ".15em", textTransform: "uppercase" as const, color: "var(--text-dim)", marginBottom: 8 }}>
                 Query
@@ -773,10 +754,11 @@ export default function Home() {
                 style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "14px 18px", color: "var(--text-bright)", fontFamily: "var(--sans)", fontSize: ".9rem", outline: "none" }}
               />
             </div>
+            {rateLimitError && <p style={{ fontFamily: "var(--mono)", fontSize: ".75rem", color: "var(--danger)", marginBottom: 12 }}>{rateLimitError}</p>}
 
             <button
               onClick={runPipeline}
-              disabled={!query.trim() || !apiKey.trim()}
+              disabled={!query.trim()}
               style={{
                 width: "100%",
                 padding: "14px 0",
@@ -787,8 +769,8 @@ export default function Home() {
                 fontFamily: "var(--mono)",
                 fontSize: ".82rem",
                 letterSpacing: ".12em",
-                cursor: query.trim() && apiKey.trim() ? "pointer" : "not-allowed",
-                opacity: query.trim() && apiKey.trim() ? 1 : 0.3,
+                cursor: query.trim() ? "pointer" : "not-allowed",
+                opacity: query.trim() ? 1 : 0.3,
                 transition: "all .3s ease",
               }}
             >
