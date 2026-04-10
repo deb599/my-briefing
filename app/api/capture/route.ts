@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       // onboarding@resend.dev only delivers to your own Resend account email.
       // To send to any email: verify a domain at resend.com/domains and use
       // something like: "Briefing Bot <noreply@yourdomain.com>"
-      from: "Briefing Bot <onboarding@resend.dev>",
+      from: "Briefing Bot <intel@ba-co-pilot.com>",
       to: [userEmail],
       subject: `Your Intelligence Briefing: "${userQuery}"`,
       html: `
