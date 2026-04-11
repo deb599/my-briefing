@@ -331,7 +331,7 @@ export default function Home() {
       });
 
       if (!response.body) return;
-      const reader = response.body.getReader();
+      const reader = response.body!.getReader();
       const decoder = new TextDecoder();
 
       while (true) {
