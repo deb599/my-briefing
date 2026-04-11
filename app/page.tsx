@@ -306,6 +306,18 @@ export default function Home() {
   };
 
   const runPipeline = async () => {
+
+    // --- MOCK TEST START ---
+  setSubmitted(true);
+  setAgentStates(AGENTS.map((agent, i) => ({
+    status: "complete",
+    data: { summary: `Mock data for ${agent.name}` },
+    streamText: "Bypassing agents for email test..."
+  })));
+  setLoading(false);
+  return; 
+  // --- MOCK TEST END ---
+    
     if (!query.trim()) return;
     setLoading(true);
     setSeedQuery(query);
