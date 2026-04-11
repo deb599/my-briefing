@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini with your API Key
+// 1. Initialize with the latest SDK requirements
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const ipHits = new Map<string, { count: number; resetAt: number }>();
@@ -14,89 +14,84 @@ function checkRateLimit(ip: string): boolean {
     ipHits.set(ip, { count: 1, resetAt: now + DAY_MS });
     return true;
   }
-  if (entry.count >= 20) return false; 
+  if (entry.count >= 50) return false; 
   entry.count++;
   return true;
 }
 
-/* ─── Agent Prompts (6-Agent Configuration) ─── */
 function buildPrompt(agentId: number, query: string, previousOutputs: string[]): string {
   const context = previousOutputs.length
-    ? `\nPrevious agent outputs for context:\n${previousOutputs.join("\n\n")}\n`
+    ? `\nContext from previous steps:\n${previousOutputs.join("\n\n")}\n`
     : "";
 
   const prompts: Record<number, string> = {
-    1: `You are Agent 01 – Sentiment Listener. Analyze the emotional undertones and public sentiment regarding: "${query}". ${context} Return your analysis in a structured JSON format.`,
-    2: `You are Agent 02 – Strategic Analyst. Identify the high-level business implications and competitive landscape for: "${query}". ${context} Return your analysis in a structured JSON format.`,
-    3: `You are Agent 03 – Risk Auditor. Detail the potential technical, financial, or reputational risks associated with: "${query}". ${context} Return your analysis in a structured JSON format.`,
-    4: `You are Agent 04 – Opportunity Scout. Highlight the immediate wins and long-term growth opportunities for: "${query}". ${context} Return your analysis in a structured JSON format.`,
-    5: `You are Agent 05 – Technical Architect. Outline the specific tools, workflows, or technical stacks required to execute on: "${query}". ${context} Return your analysis in a structured JSON format.`,
-    6: `You are Agent 06 – Executive Summary. Synthesize all previous agent findings into a cohesive, high-leverage action plan for: "${query}". ${context} Return your analysis in a structured JSON format.`,
+    1: `Step 1: Sentiment Analysis. What is the market mood for: "${query}"?`,
+    2: `Step 2: Strategic Impact. Business implications for: "${query}"? ${context}`,
+    3: `Step 3: Risk Audit. Main risks for: "${query}"? ${context}`,
+    4: `Step 4: Opportunity Scout. Growth areas for: "${query}"? ${context}`,
+    5: `Step 5: Technical Stack. Tools needed for: "${query}"? ${context}`,
+    6: `Step 6: Executive Summary. Final brief for: "${query}". ${context}`,
   };
-  return prompts[agentId] ?? `Analyze: "${query}"`;
-}
-
-function sseEvent(data: object): string {
-  // Using \n\n is critical for the frontend reader to split chunks correctly
-  return `data: ${JSON.stringify(data)}\n\n`;
+  return prompts[agentId] + " Return as clean JSON.";
 }
 
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anonymous";
+  // FORCE LOG: This will show up in Vercel even if the stream fails
+  console.log(">>> [PIPELINE] Request Received");
 
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anonymous";
   if (!checkRateLimit(ip)) {
-    return NextResponse.json({ error: "Daily limit reached." }, { status: 429 });
+    return NextResponse.json({ error: "Limit reached" }, { status: 429 });
   }
 
   try {
     const { query } = await req.json();
+    console.log(">>> [PIPELINE] Query:", query);
+
     const encoder = new TextEncoder();
     const previousOutputs: string[] = [];
 
     const stream = new ReadableStream({
       async start(controller) {
-        const send = (data: object) => controller.enqueue(encoder.encode(sseEvent(data)));
+        const send = (data: object) => {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        };
 
         try {
-          const model = genAI.getGenerativeModel({ 
-            model: "gemini-flash-latest",
-            // generationConfig: { responseMimeType: "application/json" } 
-            // Note: If you force JSON, ensure your prompt is strictly JSON-only.
-          });
+          // USE STABLE 2.5 FLASH (April 2026 Standard)
+          const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
           for (let agentId = 1; agentId <= 6; agentId++) {
-            // Updated types to match frontend listeners
+            console.log(`>>> [PIPELINE] Starting Agent ${agentId}`);
             send({ type: "start", agentId });
 
             const prompt = buildPrompt(agentId, query, previousOutputs);
-            
-            // Gemini Streaming
             const result = await model.generateContentStream(prompt);
+            
             let rawText = "";
-
             for await (const chunk of result.stream) {
-              const chunkText = chunk.text();
-              rawText += chunkText;
-              send({ type: "stream", agentId, chunk: chunkText });
+              const text = chunk.text();
+              rawText += text;
+              send({ type: "stream", agentId, chunk: text });
             }
 
             let parsedData = {};
             try {
-              // Clean common markdown wrappers if present
-              const cleanText = rawText.replace(/```json|```/g, "").trim();
-              parsedData = JSON.parse(cleanText);
+              const clean = rawText.replace(/```json|```/g, "").trim();
+              parsedData = JSON.parse(clean);
             } catch {
               parsedData = { content: rawText };
             }
 
-            previousOutputs.push(`Agent ${agentId} output: ${rawText.slice(0, 500)}`);
+            previousOutputs.push(rawText.slice(0, 500));
             send({ type: "data", agentId, data: parsedData });
           }
 
           send({ type: "done" });
-        } catch (err) {
-          console.error("Pipeline Stream Error:", err);
-          send({ type: "error", message: String(err) });
+          console.log(">>> [PIPELINE] Completed Successfully");
+        } catch (err: any) {
+          console.error(">>> [PIPELINE] Stream Error:", err.message);
+          send({ type: "error", message: err.message });
         } finally {
           controller.close();
         }
@@ -111,8 +106,8 @@ export async function POST(req: Request) {
       },
     });
 
-  } catch (error) {
-    console.error("POST Error:", error);
-    return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
+  } catch (error: any) {
+    console.error(">>> [PIPELINE] Global POST Error:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
