@@ -4,7 +4,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 import { BriefingDocument } from "@/components/BriefingDocument";
 
-// Initialize Resend with your API Key
+// Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { email, query, fullAnalysis } = body;
 
-    // 1. Basic Validation
+    // 1. Validation
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email required" }, { status: 400 });
     }
@@ -23,13 +23,12 @@ export async function POST(req: Request) {
     }
 
     const userEmail = email.trim().toLowerCase();
-    const userQuery = String(query || "Analysis Briefing");
+    const userQuery = String(query || "Strategic Briefing");
     
     /**
      * 2. SANITIZE DATA (The "e.split" Fix)
-     * This deeply traverses the analysis object and replaces any null/undefined
-     * with the string "N/A". @react-pdf/renderer crashes if it receives 
-     * non-string values in <Text> components.
+     * Deeply traverses the analysis object and replaces any null/undefined
+     * with "N/A" to prevent @react-pdf renderer from crashing.
      */
     const sanitizedAnalysis = JSON.parse(JSON.stringify(fullAnalysis), (key, value) => {
       return (value === null || value === undefined) ? "N/A" : value;
@@ -40,12 +39,17 @@ export async function POST(req: Request) {
     // 3. Generate PDF Buffer
     let pdfBuffer: Buffer;
     try {
-      pdfBuffer = await renderToBuffer(
-        React.createElement(BriefingDocument, {
-          query: userQuery,
-          analysis: sanitizedAnalysis,
-        })
-      );
+      /**
+       * TYPE FIX: We cast the React element to 'any' because the 
+       * @react-pdf/renderer 'DocumentProps' type often conflicts with 
+       * standard React 18/19 functional component definitions during build.
+       */
+      const docElement = React.createElement(BriefingDocument, {
+        query: userQuery,
+        analysis: sanitizedAnalysis,
+      }) as any;
+
+      pdfBuffer = await renderToBuffer(docElement);
     } catch (pdfErr: any) {
       console.error(">>> [PDF GEN ERROR]:", pdfErr.message);
       return NextResponse.json({ 
@@ -58,20 +62,20 @@ export async function POST(req: Request) {
 
     /**
      * 4. SEND VIA RESEND
-     * NOTE: Use "onboarding@resend.dev" as the sender until you verify 
-     * your domain (e.g., ba-co-pilot.com) in the Resend Dashboard.
+     * NOTE: 'onboarding@resend.dev' only works for your own signed-up email.
+     * Use a verified domain once you've set it up in the Resend dashboard.
      */
     const { data, error } = await resend.emails.send({
       from: "Briefing Bot <onboarding@resend.dev>", 
       to: [userEmail],
-      subject: `Strategic Briefing: ${userQuery}`,
+      subject: `Executive Briefing: ${userQuery}`,
       html: `
-        <div style="font-family: sans-serif; padding: 20px; color: #1C1C1E; line-height: 1.5;">
+        <div style="font-family: sans-serif; padding: 20px; color: #1C1C1E; line-height: 1.6;">
           <h2 style="color: #1C1C1E; border-bottom: 2px solid #FFD60A; padding-bottom: 8px; display: inline-block;">
-            Briefing Complete
+            Strategic Analysis Complete
           </h2>
-          <p>The strategic analysis for <strong>"${userQuery}"</strong> is now ready for review.</p>
-          <p>Your full 6-agent executive briefing is attached as a PDF.</p>
+          <p>Your intelligence briefing for <strong>"${userQuery}"</strong> is attached.</p>
+          <p>This report was generated using a 6-agent sequential reasoning pipeline.</p>
           <br />
           <hr style="border: none; border-top: 1px solid #EEE;" />
           <p style="font-size: 11px; color: #999; margin-top: 20px;">
@@ -82,7 +86,7 @@ export async function POST(req: Request) {
       attachments: [
         {
           filename: `Briefing_${userQuery.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`,
-          content: pdfBuffer.toString("base64"), // Transfer as Base64 for stability
+          content: pdfBuffer.toString("base64"), // Transfer as Base64 string
         },
       ],
     });
