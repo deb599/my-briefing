@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
         try {
           const model = genAI.getGenerativeModel({ 
-            model: "gemini-3-flash-preview",
+            model: "gemini-flash-latest",
             // generationConfig: { responseMimeType: "application/json" } 
             // Note: If you force JSON, ensure your prompt is strictly JSON-only.
           });
