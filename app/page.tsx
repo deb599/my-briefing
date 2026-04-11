@@ -320,7 +320,7 @@ export default function Home() {
 
       if (!response.body) return;
       const reader = response.body.getReader();
-      const decoder = new TextEncoder();
+      const decoder = new TextDecoder();
 
       while (true) {
         const { done, value } = await reader.read();
