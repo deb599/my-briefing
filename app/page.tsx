@@ -26,10 +26,10 @@ function CaveatBadge({ text }: { text: string }) {
     <span
       style={{
         display: "inline-block",
-        background: "var(--warn-dim)",
+        background: "rgba(245, 158, 11, 0.1)",
         border: "1px solid rgba(245,158,11,.25)",
-        color: "var(--warn)",
-        fontFamily: "var(--mono)",
+        color: "#f59e0b",
+        fontFamily: "var(--font-mono)",
         fontSize: ".68rem",
         padding: "3px 10px",
         borderRadius: "3px",
@@ -46,26 +46,26 @@ function ScoreBar({ value, label, note }: { value: number; label?: string; note?
     <div style={{ marginBottom: 8 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         {label && (
-          <span style={{ fontFamily: "var(--mono)", fontSize: ".65rem", color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: ".1em", minWidth: 50 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem", color: "gray", textTransform: "uppercase", letterSpacing: ".1em", minWidth: 50 }}>
             {label}
           </span>
         )}
-        <div style={{ flex: 1, height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ flex: 1, height: 6, background: "#333", borderRadius: 3, overflow: "hidden" }}>
           <div
             style={{
               height: "100%",
               width: `${pct}%`,
               borderRadius: 3,
-              background: pct > 70 ? "var(--accent)" : pct > 40 ? "var(--warn)" : "var(--decline)",
+              background: pct > 70 ? "#ffd60a" : pct > 40 ? "#f59e0b" : "#ef4444",
               transition: "width .8s ease",
             }}
           />
         </div>
-        <span style={{ fontFamily: "var(--mono)", fontSize: ".85rem", fontWeight: 700, color: pct > 70 ? "var(--accent)" : pct > 40 ? "var(--warn)" : "var(--decline)", whiteSpace: "nowrap" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: ".85rem", fontWeight: 700, color: pct > 70 ? "#ffd60a" : pct > 40 ? "#f59e0b" : "#ef4444", whiteSpace: "nowrap" }}>
           {value}/10
         </span>
       </div>
-      {note && <p style={{ fontFamily: "var(--mono)", fontSize: ".68rem", color: "var(--warn)", marginTop: 4, marginLeft: label ? 62 : 0 }}>note: {note}</p>}
+      {note && <p style={{ fontFamily: "var(--font-mono)", fontSize: ".68rem", color: "#f59e0b", marginTop: 4, marginLeft: label ? 62 : 0 }}>note: {note}</p>}
     </div>
   );
 }
@@ -78,27 +78,27 @@ function StreamingLog({ text, active }: { text: string; active: boolean }) {
   if (!text && !active) return null;
   return (
     <div style={{ marginTop: 16 }}>
-      <p style={{ fontFamily: "var(--mono)", fontSize: ".6rem", color: "var(--text-dim)", letterSpacing: ".15em", textTransform: "uppercase", marginBottom: 6 }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem", color: "gray", letterSpacing: ".15em", textTransform: "uppercase", marginBottom: 6 }}>
         {active ? "▶ raw output (streaming...)" : "▶ raw output"}
       </p>
       <div
         ref={ref}
         style={{
           background: "rgba(0,0,0,.4)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius)",
+          border: "1px solid #333",
+          borderRadius: "8px",
           padding: 14,
           maxHeight: 160,
           overflowY: "auto",
-          fontFamily: "var(--mono)",
+          fontFamily: "var(--font-mono)",
           fontSize: ".72rem",
-          color: "var(--text-dim)",
+          color: "gray",
           whiteSpace: "pre-wrap",
           lineHeight: 1.55,
         }}
       >
         {text}
-        {active && <span style={{ color: "var(--accent)", animation: "pulse 1s infinite" }}>▌</span>}
+        {active && <span style={{ color: "#ffd60a", animation: "pulse 1s infinite" }}>▌</span>}
       </div>
     </div>
   );
@@ -109,13 +109,13 @@ function StreamingLog({ text, active }: { text: string; active: boolean }) {
 function PipelineNode({ agent, status }: { agent: typeof AGENTS[0]; status: AgentStatus }) {
   const isComplete = status === "complete";
   const isRunning = status === "running";
-  const dotBorder = isComplete ? "var(--accent)" : isRunning ? "var(--warn)" : "var(--border)";
-  const innerColor = isComplete ? "var(--accent)" : isRunning ? "var(--warn)" : "var(--border)";
-  const nameColor = isComplete ? "var(--text)" : isRunning ? "var(--warn)" : "var(--text-dim)";
+  const dotBorder = isComplete ? "#ffd60a" : isRunning ? "#f59e0b" : "#333";
+  const innerColor = isComplete ? "#ffd60a" : isRunning ? "#f59e0b" : "#333";
+  const nameColor = isComplete ? "white" : isRunning ? "#f59e0b" : "gray";
 
   return (
     <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, minWidth: 110 }}>
-      <span style={{ fontFamily: "var(--mono)", fontSize: ".6rem", color: "var(--text-dim)", letterSpacing: ".1em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem", color: "gray", letterSpacing: ".1em" }}>
         {String(agent.id).padStart(2, "0")}
       </span>
       <div
@@ -123,7 +123,7 @@ function PipelineNode({ agent, status }: { agent: typeof AGENTS[0]; status: Agen
           width: 40,
           height: 40,
           borderRadius: "50%",
-          background: "var(--surface-raised)",
+          background: "#1c1c1e",
           border: `2px solid ${dotBorder}`,
           display: "flex",
           alignItems: "center",
@@ -138,11 +138,10 @@ function PipelineNode({ agent, status }: { agent: typeof AGENTS[0]; status: Agen
             borderRadius: "50%",
             background: innerColor,
             boxShadow: isComplete || isRunning ? `0 0 12px ${innerColor}` : "none",
-            animation: isRunning ? "pulse 2s infinite" : isComplete ? "none" : "none",
           }}
         />
       </div>
-      <span style={{ fontFamily: "var(--mono)", fontSize: ".65rem", color: nameColor, textAlign: "center", maxWidth: 100, lineHeight: 1.35 }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem", color: nameColor, textAlign: "center", maxWidth: 100, lineHeight: 1.35 }}>
         {agent.name}
       </span>
     </div>
@@ -156,7 +155,7 @@ function PipelineConnector({ active }: { active: boolean }) {
         flex: "1 1 auto",
         minWidth: 16,
         height: 2,
-        background: active ? "linear-gradient(90deg, var(--accent), var(--border-accent))" : "var(--border)",
+        background: active ? "#ffd60a" : "#333",
         alignSelf: "center",
         marginTop: -14,
         transition: "background .5s ease",
@@ -175,17 +174,15 @@ function AgentCard({ agentId, data, streamText, status }: {
 }) {
   const isRunning = status === "running";
   const isDone = status === "complete";
-  const borderColor = isRunning ? "var(--warn)" : isDone ? "var(--border-accent)" : "var(--border)";
+  const borderColor = isRunning ? "#f59e0b" : isDone ? "#ffd60a" : "#333";
 
   return (
     <div
       style={{
         border: `1px solid ${borderColor}`,
-        borderRadius: "var(--radius)",
-        background: "var(--surface)",
+        borderRadius: "8px",
+        background: "#1c1c1e",
         padding: "28px 32px",
-        transition: "border-color .4s ease",
-        animation: "fadeUp .5s forwards",
         marginBottom: 24,
       }}
     >
@@ -193,32 +190,29 @@ function AgentCard({ agentId, data, streamText, status }: {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span
             style={{
-              fontFamily: "var(--mono)",
+              fontFamily: "var(--font-mono)",
               fontSize: ".7rem",
-              background: "var(--accent-dim)",
-              color: "var(--accent)",
+              background: "rgba(255, 214, 10, 0.1)",
+              color: "#ffd60a",
               padding: "3px 9px",
               borderRadius: 3,
-              letterSpacing: ".05em",
             }}
           >
             {String(agentId).padStart(2, "0")}
           </span>
-          <span style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-bright)" }}>
+          <span style={{ fontSize: "1.05rem", fontWeight: 700, color: "white" }}>
             {AGENTS[agentId - 1].name}
           </span>
         </div>
         <span
           style={{
-            fontFamily: "var(--mono)",
+            fontFamily: "var(--font-mono)",
             fontSize: ".62rem",
-            letterSpacing: ".1em",
             textTransform: "uppercase",
             padding: "3px 10px",
             borderRadius: 3,
-            border: `1px solid ${isRunning ? "var(--warn)" : isDone ? "var(--border)" : "var(--border)"}`,
-            color: isRunning ? "var(--warn)" : isDone ? "var(--text-dim)" : "var(--text-dim)",
-            animation: isRunning ? "pulse 1.5s infinite" : "none",
+            border: `1px solid ${isRunning ? "#f59e0b" : "#333"}`,
+            color: isRunning ? "#f59e0b" : "gray",
           }}
         >
           {isRunning ? "RUNNING" : isDone ? "COMPLETE" : "IDLE"}
@@ -228,14 +222,7 @@ function AgentCard({ agentId, data, streamText, status }: {
       <StreamingLog text={streamText} active={isRunning} />
 
       {isDone && data && (
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-            <span style={{ fontFamily: "var(--mono)", fontSize: ".6rem", letterSpacing: ".15em", textTransform: "uppercase", color: "var(--text-dim)" }}>
-              parsed output
-            </span>
-            <CaveatBadge text="AI-estimated, not live data" />
-          </div>
-
+        <div style={{ borderTop: "1px solid #333", paddingTop: 20, marginTop: 16 }}>
           {agentId === 1 && renderAgent1(data)}
           {agentId === 2 && renderAgent2(data)}
           {agentId === 3 && renderAgent3(data)}
@@ -254,129 +241,42 @@ function renderAgent1(data: Record<string, any>) {
   return (
     <div>
       <ScoreBar value={Number(data.score) || 0} label="score" note={String(data.score_confidence || "")} />
-      <p style={{ color: "var(--text)", fontSize: ".88rem", lineHeight: 1.65, borderLeft: "2px solid var(--border)", paddingLeft: 16, margin: "16px 0" }}>
+      <p style={{ color: "white", fontSize: ".88rem", lineHeight: 1.65, borderLeft: "2px solid #333", paddingLeft: 16, margin: "16px 0" }}>
         {String(data.summary || "")}
       </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-        {((data.top_themes as string[]) || []).map((t, i) => (
-          <span key={i} style={{ fontFamily: "var(--mono)", fontSize: ".7rem", padding: "5px 12px", borderRadius: 20, background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}>
-            {t}
-          </span>
-        ))}
-      </div>
-      {data.data_caveat && (
-        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--warn-dim)", borderLeft: "3px solid var(--warn)", fontSize: ".82rem", color: "var(--text)", lineHeight: 1.6 }}>
-          <span style={{ fontFamily: "var(--mono)", fontSize: ".62rem", color: "var(--warn)", letterSpacing: ".1em", textTransform: "uppercase" }}>CAVEAT: </span>
-          {String(data.data_caveat)}
-        </div>
-      )}
     </div>
   );
 }
 
 function renderAgent2(data: Record<string, any>) {
-  const roles = (data.top_roles as string[]) || [];
-  const industries = (data.top_industries as string[]) || [];
-  const salary = data.salary_range as Record<string, any> | undefined;
   return (
     <div>
-      <ScoreBar value={Number(data.demand_score) || 0} label="demand" note={String(data.demand_score_note || "")} />
+      <ScoreBar value={Number(data.demand_score) || 0} label="demand" />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, margin: "20px 0" }}>
         <div>
-          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 10 }}>Top Roles</p>
-          {roles.map((r, i) => (
-            <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", padding: "4px 0", paddingLeft: 14, position: "relative" }}>
-              <span style={{ position: "absolute", left: 0, top: 10, width: 5, height: 5, borderRadius: "50%", background: "var(--accent)" }} />
-              {r}
-            </p>
-          ))}
-        </div>
-        <div>
-          <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 10 }}>Industries</p>
-          {industries.map((ind, i) => (
-            <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", padding: "4px 0", paddingLeft: 14, position: "relative" }}>
-              <span style={{ position: "absolute", left: 0, top: 10, width: 5, height: 5, borderRadius: "50%", background: "var(--warn)" }} />
-              {ind}
-            </p>
-          ))}
+          <p style={{ fontSize: ".84rem", color: "white" }}>{String(data.top_roles?.[0] || "N/A")}</p>
         </div>
       </div>
-      {salary && (
-        <div style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--accent-dim)", borderLeft: "3px solid var(--accent)", fontSize: ".86rem", marginBottom: 16 }}>
-          <span style={{ fontFamily: "var(--mono)", color: "var(--accent)", fontWeight: 700 }}>
-            AU${((salary.min as number) / 1000).toFixed(0)}K–AU${((salary.max as number) / 1000).toFixed(0)}K
-          </span>
-          <span style={{ color: "var(--text-dim)", fontSize: ".78rem", marginLeft: 10 }}>({String(salary.note || "estimate only")})</span>
-        </div>
-      )}
     </div>
   );
 }
 
 function renderAgent3(data: Record<string, any>) {
-  const combos = (data.recommended_combinations as string[]) || [];
-  const paths = (data.top_career_paths as Array<Record<string, any>>) || [];
-  return (
-    <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-        {combos.map((c, i) => (
-          <span key={i} style={{ fontFamily: "var(--mono)", fontSize: ".72rem", padding: "6px 14px", borderRadius: 20, background: "var(--accent-dim)", border: "1px solid var(--border-accent)", color: "var(--accent)" }}>
-            {c}
-          </span>
-        ))}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {paths.map((p, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)" }}>
-            <span style={{ fontWeight: 600, color: "var(--text-bright)", fontSize: ".88rem" }}>{String(p.title)}</span>
-            <div style={{ textAlign: "right", fontFamily: "var(--mono)", fontSize: ".78rem" }}>
-              <span style={{ color: "var(--accent)" }}>AU${(Number(p.avg_salary_aud) / 1000).toFixed(0)}K</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return <p style={{ fontSize: ".88rem", color: "white" }}>{String(data.summary || "Path analysis complete.")}</p>;
 }
 
 function renderAgent4(data: Record<string, any>) {
-  const safeBets = (data.safe_bets as string[]) || [];
-  return (
-    <div>
-      <ScoreBar value={Number(data.trajectory_score) || 0} label="trajectory" note={String(data.trajectory_note || "")} />
-      <div style={{ padding: 20, marginTop: 16, borderRadius: "var(--radius)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderTop: "3px solid var(--grow)" }}>
-        <p style={{ fontFamily: "var(--mono)", fontSize: ".65rem", letterSpacing: ".15em", textTransform: "uppercase", color: "var(--grow)", marginBottom: 12 }}>SAFE BETS</p>
-        {safeBets.map((s, i) => (
-          <p key={i} style={{ fontSize: ".84rem", color: "var(--text)", padding: "6px 0", borderBottom: i < safeBets.length - 1 ? "1px solid var(--border)" : "none" }}>✓ {s}</p>
-        ))}
-      </div>
-    </div>
-  );
+  return <ScoreBar value={Number(data.trajectory_score) || 0} label="trajectory" />;
 }
 
 function renderAgent5(data: Record<string, any>) {
-  const bottlenecks = (data.bottlenecks || []) as Array<Record<string, any>>;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {bottlenecks.map((b, i) => (
-        <div key={i} style={{ padding: "14px 18px", borderRadius: "var(--radius)", background: "var(--surface-raised)", borderLeft: "3px solid var(--danger)" }}>
-          <p style={{ fontWeight: 700, fontSize: ".86rem", color: "var(--text-bright)" }}>{String(b.issue)}</p>
-          <p style={{ fontSize: ".82rem", color: "var(--text-dim)", marginTop: 4 }}>{String(b.detail)}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <p style={{ fontSize: ".88rem", color: "white" }}>{String(data.bottlenecks?.[0]?.issue || "No significant bottlenecks.")}</p>;
 }
 
 function renderAgent6(data: Record<string, any>) {
-  const verdict = String(data.verdict || "").toLowerCase();
-  const verdictColor = verdict === "go" ? "var(--grow)" : "var(--danger)";
   return (
-    <div style={{ padding: "28px 32px", borderRadius: "var(--radius)", background: "var(--surface-raised)", borderLeft: `4px solid ${verdictColor}` }}>
-      <div style={{ display: "inline-block", padding: "8px 18px", borderRadius: "var(--radius)", border: `1px solid ${verdictColor}`, marginBottom: 20 }}>
-        <span style={{ fontFamily: "var(--mono)", fontSize: "1rem", fontWeight: 700, color: verdictColor }}>{verdict.toUpperCase()}</span>
-      </div>
-      <p style={{ fontSize: ".95rem", color: "var(--text-bright)", lineHeight: 1.7 }}>{String(data.recommendation || "")}</p>
+    <div style={{ padding: "28px 32px", borderRadius: "8px", background: "#000", borderLeft: `4px solid #ffd60a` }}>
+      <p style={{ fontSize: ".95rem", color: "white", lineHeight: 1.7 }}>{String(data.recommendation || "")}</p>
     </div>
   );
 }
@@ -398,7 +298,9 @@ export default function Home() {
   const updateAgent = (index: number, updates: Partial<AgentState>) => {
     setAgentStates((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], ...updates };
+      if (next[index]) {
+        next[index] = { ...next[index], ...updates };
+      }
       return next;
     });
   };
@@ -408,8 +310,6 @@ export default function Home() {
     setLoading(true);
     setSeedQuery(query);
     setSubmitted(true);
-    
-    // Reset states
     setAgentStates(AGENTS.map(() => ({ status: "idle", data: null, streamText: "" })));
 
     try {
@@ -420,18 +320,20 @@ export default function Home() {
 
       if (!response.body) return;
       const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      const decoder = new TextEncoder();
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(Boolean);
+        // Split by the double newline used in SSE
+        const lines = chunk.split("\n\n").filter(l => l.startsWith("data: "));
 
         for (const line of lines) {
           try {
-            const payload = JSON.parse(line);
+            const rawJson = line.replace("data: ", "");
+            const payload = JSON.parse(rawJson);
             const idx = payload.agentId - 1;
 
             if (payload.type === "start") {
@@ -439,14 +341,15 @@ export default function Home() {
             } else if (payload.type === "stream") {
               setAgentStates(prev => {
                 const next = [...prev];
-                next[idx].streamText += payload.text;
+                // CRITICAL FIX: payload.chunk instead of payload.text
+                next[idx].streamText += (payload.chunk || ""); 
                 return next;
               });
             } else if (payload.type === "data") {
               updateAgent(idx, { status: "complete", data: payload.data });
             }
           } catch (e) {
-            console.error("Chunk parse error", e);
+            console.error("Parse error on line:", line);
           }
         }
       }
@@ -459,8 +362,6 @@ export default function Home() {
 
   const sendEmail = async () => {
     setEmailError("");
-    
-    // Construct the full analysis object for the PDF
     const fullAnalysis = agentStates.reduce((acc, agent, idx) => {
       acc[`agent${idx + 1}`] = agent.data;
       return acc;
@@ -477,25 +378,21 @@ export default function Home() {
         }),
       });
 
-      if (res.ok) {
-        setEmailSent(true);
-      } else {
-        const err = await res.json();
-        setEmailError(err.error || "Failed to send.");
-      }
+      if (res.ok) setEmailSent(true);
+      else setEmailError("Failed to send.");
     } catch (e) {
       setEmailError("Connection error.");
     }
   };
 
   return (
-    <main style={{ maxWidth: 900, margin: "0 auto", padding: "60px 20px" }}>
+    <main style={{ maxWidth: 900, margin: "0 auto", padding: "60px 20px", background: "#1c1c1e", minHeight: "100vh", color: "white" }}>
       <header style={{ marginBottom: 60, textAlign: "center" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--accent)", marginBottom: 12 }}>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#ffd60a", marginBottom: 12 }}>
           Subject Decision Briefing
         </h1>
-        <p style={{ color: "var(--text-dim)", fontFamily: "var(--mono)", fontSize: ".85rem" }}>
-          6 AI agents reasoning sequentially about your career query.
+        <p style={{ color: "gray", fontFamily: "var(--font-mono)", fontSize: ".85rem" }}>
+          6 AI agents reasoning sequentially about your query.
         </p>
       </header>
 
@@ -505,9 +402,9 @@ export default function Home() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="e.g. Is a Masters in Data Science worth it in 2026?"
-            style={{ flex: 1, padding: "16px 20px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", color: "var(--text)" }}
+            style={{ flex: 1, padding: "16px 20px", background: "#000", border: "1px solid #333", borderRadius: "8px", color: "white" }}
           />
-          <button onClick={runPipeline} disabled={loading} style={{ padding: "0 32px", background: "var(--accent)", color: "var(--bg)", fontWeight: 700, borderRadius: "var(--radius)" }}>
+          <button onClick={runPipeline} disabled={loading} style={{ padding: "0 32px", background: "#ffd60a", color: "#1c1c1e", fontWeight: 700, borderRadius: "8px" }}>
             {loading ? "PROCESSING..." : "RUN PIPELINE"}
           </button>
         </div>
@@ -532,7 +429,7 @@ export default function Home() {
           </div>
 
           {agentStates[5].status === "complete" && (
-            <div style={{ marginTop: 80, padding: 40, background: "var(--surface)", border: "1px solid var(--border-accent)", borderRadius: "var(--radius)", textAlign: "center" }}>
+            <div style={{ marginTop: 80, padding: 40, background: "#000", border: "1px solid #ffd60a", borderRadius: "8px", textAlign: "center" }}>
               <h2 style={{ fontSize: "1.5rem", marginBottom: 12 }}>Get your Full Executive Briefing (PDF)</h2>
               <div style={{ display: "flex", gap: 12, maxWidth: 500, margin: "24px auto 0" }}>
                 <input
@@ -540,14 +437,13 @@ export default function Home() {
                   value={captureEmail}
                   onChange={(e) => setCaptureEmail(e.target.value)}
                   placeholder="your@email.com"
-                  style={{ flex: 1, padding: "12px 18px", background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)", borderRadius: 4 }}
+                  style={{ flex: 1, padding: "12px 18px", background: "#1c1c1e", border: "1px solid #333", color: "white", borderRadius: 4 }}
                 />
-                <button onClick={sendEmail} style={{ padding: "0 24px", background: "var(--accent)", color: "var(--bg)", fontWeight: 700, borderRadius: 4 }}>
+                <button onClick={sendEmail} style={{ padding: "0 24px", background: "#ffd60a", color: "#1c1c1e", fontWeight: 700, borderRadius: 4 }}>
                   SEND PDF
                 </button>
               </div>
-              {emailSent && <p style={{ color: "var(--accent)", marginTop: 16 }}>Briefing sent! Check your inbox.</p>}
-              {emailError && <p style={{ color: "var(--danger)", marginTop: 16 }}>{emailError}</p>}
+              {emailSent && <p style={{ color: "#ffd60a", marginTop: 16 }}>Briefing sent! Check your inbox.</p>}
             </div>
           )}
         </>
