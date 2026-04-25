@@ -40,96 +40,91 @@ export const MOCK_DNA_PROFILE = {
 
 /* ─────────────────────────────────────────
    GENERIC MOCK DATA (no student profile)
-   Query: "Is a Masters in Data Science worth it in 2026?"
+   Query: "Should I do a Bachelor of Computer Science?"
 ───────────────────────────────────────── */
 
 export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
   1: {
-    score: 7,
+    score: 8,
     score_confidence: "medium",
     sentiment_label: "Positive",
     summary:
-      "Public sentiment toward data science careers remains broadly positive, driven by sustained employer demand and high-profile AI advances. However, there is growing scepticism about market saturation at the entry level — bootcamp fatigue and junior-role competition are recurring themes.",
-    top_themes: ["AI hype vs. reality", "Entry-level saturation", "High senior demand"],
-    concern_level: "medium",
+      "Computer Science remains one of the most in-demand bachelor degrees. Students and graduates are generally positive about career prospects, though there's growing awareness that the degree alone isn't enough — projects, internships, and specialisation matter more than ever.",
+    top_themes: ["Strong graduate demand", "Portfolio matters more than GPA", "AI changing the skillset"],
+    concern_level: "low",
     key_quote:
-      "The field is great if you can get past the junior bottleneck — senior data scientists are still in massive demand.",
+      "A CS degree opens doors, but what you build outside class is what gets you hired.",
   },
   2: {
-    demand_level: "high",
-    demand_score: 7,
-    top_roles: ["Data Scientist", "ML Engineer", "Data Analyst", "AI/ML Product Manager"],
-    salary_range: { min: 85000, max: 145000 },
-    top_industries: ["Financial Services", "Healthcare", "Technology"],
+    demand_level: "very_high",
+    demand_score: 9,
+    top_roles: ["Software Engineer", "Full-Stack Developer", "Data Analyst", "Cloud Engineer"],
+    salary_range: { min: 65000, max: 110000 },
+    top_industries: ["Technology", "Financial Services", "Healthcare", "Government"],
     hiring_trend: "growing",
   },
   3: {
     recommended_combinations: [
-      "Data Science + Domain Expertise (finance/health)",
-      "ML Engineering + Cloud Infrastructure",
-      "Analytics + Business Strategy",
+      "Computer Science + minor in Business or Design",
+      "Software Engineering + internship-heavy pathway",
+      "IT + specialisation in cybersecurity or cloud",
     ],
     top_career_paths: [
-      { title: "Senior Data Scientist", years_to_reach: "3–5 years", avg_salary_aud: 140000, salary_certainty: "medium" },
-      { title: "ML Engineering Lead", years_to_reach: "4–6 years", avg_salary_aud: 165000, salary_certainty: "low" },
-      { title: "Head of Data / Analytics Director", years_to_reach: "7–10 years", avg_salary_aud: 200000, salary_certainty: "low" },
+      { title: "Junior Software Engineer", years_to_reach: "0–1 year", avg_salary_aud: 72000, salary_certainty: "medium" },
+      { title: "Mid-Level Developer", years_to_reach: "2–4 years", avg_salary_aud: 105000, salary_certainty: "medium" },
+      { title: "Senior Engineer / Tech Lead", years_to_reach: "5–8 years", avg_salary_aud: 150000, salary_certainty: "medium" },
     ],
-    transferable_skills: ["Statistical modelling", "Python/SQL", "Stakeholder communication"],
-    entry_point: "Junior Data Analyst or Associate Data Scientist",
-    path_caveats:
-      "Timelines assume continuous upskilling and favourable market conditions. AI tooling may compress or eliminate some mid-level roles.",
+    transferable_skills: ["Problem solving", "Programming (Python, JS, SQL)", "Systems thinking"],
+    entry_point: "Junior Developer or Graduate Software Engineer",
     summary:
-      "Three clear paths emerge: deep technical (ML Engineering), applied business (Analytics Director), or hybrid. The strongest hedge is combining technical skill with a specific industry vertical.",
+      "A CS degree leads naturally into software engineering, but also opens paths in data, cybersecurity, product management, and tech consulting. The key is picking a direction by third year.",
   },
   4: {
     growth_trajectory: "growing",
-    trajectory_score: 7,
-    ai_disruption_risk: "medium",
+    trajectory_score: 8,
+    ai_disruption_risk: "low",
     ai_risk_detail:
-      "AI will automate routine analysis and reporting. Problem framing, stakeholder communication, and novel research remain hard to automate. The risk is real but manageable with continuous upskilling.",
-    five_year_outlook: "cautious",
-    subjects_to_avoid: ["Pure reporting/dashboarding (high automation risk)", "Generic analytics without specialisation"],
-    safe_bets: ["ML/AI engineering with deployment skills", "Data science + healthcare domain", "AI safety and evaluation roles"],
+      "AI tools are changing how developers work but increasing demand for people who can build with them. CS graduates who learn to work alongside AI will be more productive, not replaced.",
+    five_year_outlook: "optimistic",
+    subjects_to_avoid: ["Pure IT support roles (limited growth)", "Generic diplomas without a programming foundation"],
+    safe_bets: ["Software engineering with AI tool fluency", "Cybersecurity", "Cloud infrastructure and DevOps"],
     wildcard_risk:
-      "A breakthrough in autonomous AI agents could collapse demand for mid-level analysis roles faster than expected.",
+      "If AI coding tools advance rapidly, the bar for entry-level roles may rise — making internships and side projects even more critical.",
   },
   5: {
     bottlenecks: [
-      { issue: "Junior role saturation", severity: "high", detail: "AI tools raise the bar for entry-level while bootcamp supply keeps growing.", who_it_hits: "entry-level" },
-      { issue: "AI-generated application noise", severity: "high", detail: "Recruiters are flooded with AI-written applications, making genuine candidates harder to spot.", who_it_hits: "everyone" },
-      { issue: "Credential devaluation", severity: "medium", detail: "As AI commoditises basic data skills, generic Masters degrees carry less weight.", who_it_hits: "entry-level" },
-      { issue: "Tooling churn", severity: "medium", detail: "The AI/ML tooling landscape changes quarterly, creating constant upskilling pressure.", who_it_hits: "mid-career" },
+      { issue: "Graduate competition", severity: "high", detail: "CS is one of the most popular degrees — standing out requires projects, not just grades.", who_it_hits: "entry-level" },
+      { issue: "AI-assisted homework problem", severity: "medium", detail: "Students relying on AI to complete assignments may graduate without core skills employers test for.", who_it_hits: "entry-level" },
+      { issue: "Internship bottleneck", severity: "high", detail: "Top companies fill graduate roles from their intern pipeline — students without internships face a harder job search.", who_it_hits: "entry-level" },
     ],
     pain_points: [
-      "Hiring now includes AI-specific screening that didn't exist 2 years ago",
-      "Portfolio projects look increasingly similar because candidates use the same AI tools",
-      "Remote work competition has gone global, compressing salaries for non-senior roles",
+      "University curriculum can lag behind industry tools and frameworks",
+      "Group projects rarely reflect real-world engineering team dynamics",
+      "Many students don't start building a portfolio until final year — too late",
     ],
-    ai_noise_factor: "high",
-    ai_noise_detail: "AI-generated resumes and portfolio projects are flooding the market, making genuine skill assessment harder.",
+    ai_noise_factor: "medium",
+    ai_noise_detail: "AI-generated assignments and projects make it harder for employers to assess genuine ability. Live coding interviews are becoming standard.",
     skill_atrophy_risk: "medium",
-    skill_atrophy_detail: "Over-reliance on AI code assistants may erode debugging, statistical reasoning, and first-principles thinking.",
-    hiring_impact: "Many employers now require live coding or take-home projects specifically designed to test skills AI can't fake.",
-    regulatory_friction: "Emerging AI governance requirements are creating new compliance roles but also adding overhead.",
-    silver_lining: "Practitioners who combine genuine technical depth with domain expertise are more valuable than ever — AI raises the floor and the ceiling.",
+    skill_atrophy_detail: "Students who lean too heavily on AI assistants during study may struggle with debugging, logic, and first-principles problem solving.",
+    silver_lining: "Students who build real projects and learn to use AI tools effectively have a massive advantage over those who don't.",
   },
   6: {
     recommendation:
-      "A Masters in Data Science is still a viable career investment in 2026, but only if paired with a clear specialisation and practical project experience. A generic degree without differentiation carries meaningful risk of underemployment.",
-    confidence_score: 6,
+      "A Bachelor of Computer Science is a strong choice with excellent career prospects. The degree itself opens doors, but what separates successful graduates is building real projects, securing internships, and picking a specialisation by third year.",
+    confidence_score: 8,
     doors_opened: [
-      "Access to senior/specialist roles requiring postgraduate credentials",
-      "Visa/immigration pathways requiring a Masters",
-      "Research and R&D roles in AI-forward organisations",
+      "Software engineering roles across almost every industry",
+      "Pathway to high-paying senior and leadership positions",
+      "Foundation for specialising in AI, cybersecurity, or product",
     ],
     doors_closed: [
-      "2 years of opportunity cost (~$80K–$150K AUD)",
-      "Risk of graduating into a reshaped market where the degree carries less value",
+      "3–4 years of study before full-time earning",
+      "Degree alone won't guarantee a role without practical experience",
     ],
     risk_flag:
-      "The biggest risk is graduating without a specialisation that distinguishes you from thousands of other data science graduates.",
-    one_liner: "Worth it if you specialise ruthlessly — risky if you treat it as a generic credential.",
-    verdict: "caution",
+      "The biggest risk is coasting through the degree without building anything — graduates with no portfolio or internships face a tough market.",
+    one_liner: "Strong choice — but only if you build things along the way, not just study theory.",
+    verdict: "go",
   },
 };
 
