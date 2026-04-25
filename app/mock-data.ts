@@ -46,27 +46,22 @@ export const MOCK_DNA_PROFILE = {
 export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
   1: {
     score: 7,
-    score_confidence: "medium — AI-estimated from training data patterns",
+    score_confidence: "medium",
     sentiment_label: "Positive",
     summary:
-      "Public sentiment toward data science careers remains broadly positive, driven by sustained employer demand and high-profile AI advances. However, there is growing scepticism about market saturation at the entry level — bootcamp fatigue and junior-role competition are recurring themes. This assessment is based on historical patterns, not live data.",
+      "Public sentiment toward data science careers remains broadly positive, driven by sustained employer demand and high-profile AI advances. However, there is growing scepticism about market saturation at the entry level — bootcamp fatigue and junior-role competition are recurring themes.",
     top_themes: ["AI hype vs. reality", "Entry-level saturation", "High senior demand"],
     concern_level: "medium",
-    data_caveat:
-      "Cannot access current Reddit, LinkedIn, or forum sentiment — patterns may have shifted since training cutoff.",
     key_quote:
       "The field is great if you can get past the junior bottleneck — senior data scientists are still in massive demand.",
   },
   2: {
     demand_level: "high",
     demand_score: 7,
-    demand_score_note: "AI estimate based on training data trends, not live job board scraping.",
     top_roles: ["Data Scientist", "ML Engineer", "Data Analyst", "AI/ML Product Manager"],
-    salary_range: { min: 85000, max: 145000, note: "AUD estimate only, may be 1-2 years outdated" },
+    salary_range: { min: 85000, max: 145000 },
     top_industries: ["Financial Services", "Healthcare", "Technology"],
-    job_volume_estimate: "Estimated 10,000–18,000 open roles nationally (unverified)",
     hiring_trend: "growing",
-    data_gaps: ["Cannot verify current job board volumes", "Regional salary variation not captured"],
   },
   3: {
     recommended_combinations: [
@@ -89,13 +84,10 @@ export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
   4: {
     growth_trajectory: "growing",
     trajectory_score: 7,
-    trajectory_note: "Directional estimate only — AI disruption pace is inherently unpredictable.",
     ai_disruption_risk: "medium",
     ai_risk_detail:
       "AI will automate routine analysis and reporting. Problem framing, stakeholder communication, and novel research remain hard to automate. The risk is real but manageable with continuous upskilling.",
     five_year_outlook: "cautious",
-    five_year_note:
-      "Positive overall trajectory, but the nature of 'data science' roles will shift significantly by 2030.",
     subjects_to_avoid: ["Pure reporting/dashboarding (high automation risk)", "Generic analytics without specialisation"],
     safe_bets: ["ML/AI engineering with deployment skills", "Data science + healthcare domain", "AI safety and evaluation roles"],
     wildcard_risk:
@@ -120,13 +112,11 @@ export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
     hiring_impact: "Many employers now require live coding or take-home projects specifically designed to test skills AI can't fake.",
     regulatory_friction: "Emerging AI governance requirements are creating new compliance roles but also adding overhead.",
     silver_lining: "Practitioners who combine genuine technical depth with domain expertise are more valuable than ever — AI raises the floor and the ceiling.",
-    data_caveat: "These assessments are based on training data patterns and may not reflect the most recent market shifts.",
   },
   6: {
     recommendation:
       "A Masters in Data Science is still a viable career investment in 2026, but only if paired with a clear specialisation and practical project experience. A generic degree without differentiation carries meaningful risk of underemployment.",
     confidence_score: 6,
-    confidence_note: "Limited by inability to verify current job market data and the pace of AI disruption.",
     doors_opened: [
       "Access to senior/specialist roles requiring postgraduate credentials",
       "Visa/immigration pathways requiring a Masters",
@@ -140,7 +130,6 @@ export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
       "The biggest risk is graduating without a specialisation that distinguishes you from thousands of other data science graduates.",
     one_liner: "Worth it if you specialise ruthlessly — risky if you treat it as a generic credential.",
     verdict: "caution",
-    disclaimer: "AI-generated analysis only. Verify with current sources before making decisions.",
   },
 };
 
@@ -153,7 +142,7 @@ export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
 export const MOCK_AGENT_DATA_PERSONALISED: Record<number, Record<string, any>> = {
   1: {
     score: 8,
-    score_confidence: "medium — pattern-matched to Jamie's stated interests and archetype",
+    score_confidence: "medium",
     sentiment_label: "Very Positive",
     summary:
       "Sentiment around tech-creative career paths — software engineering, product design, game development, and indie tech — is strongly positive among students with Jamie's profile. The combination of 'Technical Optimizer' and 'Entrepreneurial Builder' archetypes is one of the most sought-after in the 2026 market. Crucially, Jamie's identified Green Lights (tangible output, autonomy, fast feedback) map directly to environments where this archetype thrives: product companies, startups, and applied engineering roles.",
@@ -163,29 +152,21 @@ export const MOCK_AGENT_DATA_PERSONALISED: Record<number, Record<string, any>> =
       "Creative-technical crossover roles surging",
     ],
     concern_level: "low",
-    data_caveat:
-      "Sentiment analysis is AI-estimated. Individual outcomes vary significantly by institution, network, and specialisation choice.",
     key_quote:
       "The students who build things while studying — apps, games, tools — consistently outperform those who only study the theory.",
   },
   2: {
     demand_level: "very_high",
     demand_score: 9,
-    demand_score_note: "Roles aligned with Jamie's archetype are among the highest-demand in the market.",
     top_roles: [
       "Software / Full-Stack Engineer",
       "Product Designer (UX/UI)",
       "Game Developer / Technical Artist",
       "Indie Founder / Technical Co-founder",
     ],
-    salary_range: { min: 90000, max: 160000, note: "AUD estimate for mid-level roles, 3–5 yrs exp. Entry ~$70K." },
+    salary_range: { min: 90000, max: 160000 },
     top_industries: ["Technology / SaaS", "Games & Interactive Media", "Creative Tech / Agencies"],
-    job_volume_estimate: "Software engineers alone: est. 40,000–60,000 open roles nationally (unverified)",
     hiring_trend: "surging",
-    data_gaps: [
-      "Game dev market is more volatile — indie vs. studio paths differ significantly",
-      "Regional variation significant: Sydney/Melbourne vs. other cities",
-    ],
   },
   3: {
     recommended_combinations: [
@@ -212,13 +193,10 @@ export const MOCK_AGENT_DATA_PERSONALISED: Record<number, Record<string, any>> =
   4: {
     growth_trajectory: "rapidly_growing",
     trajectory_score: 9,
-    trajectory_note: "Technical Optimizer archetype in high-autonomy roles is one of the most AI-resistant career profiles.",
     ai_disruption_risk: "low",
     ai_risk_detail:
       "Jamie's Green Lights align with the roles AI is augmenting, not replacing. Builders who use AI as a tool — rather than compete with it — are seeing output multiply 3–5x. The 'Entrepreneurial Builder' archetype specifically benefits from AI reducing the cost of building solo projects.",
     five_year_outlook: "optimistic",
-    five_year_note:
-      "The window for Technical Optimizer / Entrepreneurial Builder types is arguably the most favourable it has ever been. Low-cost AI tooling means solo builders can now create what used to require teams.",
     subjects_to_avoid: [
       "Generic IT support / help desk roles (no creative output, Jamie's Hard No)",
       "Enterprise systems administration (bureaucratic, slow feedback)",
@@ -274,14 +252,11 @@ export const MOCK_AGENT_DATA_PERSONALISED: Record<number, Record<string, any>> =
     regulatory_friction: "Minimal for software/product roles at this stage.",
     silver_lining:
       "Jamie's combination of 3D design, video editing, and systems thinking is exactly the profile emerging 'spatial computing' and XR roles are starving for. This is a niche with almost no competition from peers.",
-    data_caveat: "These bottleneck assessments are pattern-matched to Jamie's profile, not real-time market data.",
   },
   6: {
     recommendation:
       "Jamie should pursue a Computer Science or Software Engineering degree with a deliberate creative specialisation — and start building a public portfolio of personally meaningful projects now, before university. The Technical Optimizer + Entrepreneurial Builder combination is rare and highly valued; the risk is letting formal education crowd out the self-directed building that makes this archetype exceptional.",
     confidence_score: 8,
-    confidence_note:
-      "Higher confidence than a generic query because Jamie's Green Lights and Hard Nos tightly constrain the solution space. Main uncertainty: specific institution quality and whether Jamie sustains the builder habit.",
     doors_opened: [
       "Product Engineering at high-growth tech companies",
       "UX Engineering — the rare bridge between design and code",
@@ -298,7 +273,5 @@ export const MOCK_AGENT_DATA_PERSONALISED: Record<number, Record<string, any>> =
     one_liner:
       "Build in public, study CS with a creative lens, and trust that the market is starving for exactly what Jamie already is.",
     verdict: "go",
-    disclaimer:
-      "AI-generated analysis tailored to Jamie's Career DNA profile. Not professional career advice — verify with a qualified counsellor before making decisions.",
   },
 };
