@@ -144,330 +144,108 @@ function PipelineConnector({ active }: { active: boolean }) {
 }
 
 /* ─────────────────────────────────────────
-   AGENT CARD RENDERERS
+   AGENT CARD RENDERERS (minimal)
 ───────────────────────────────────────── */
 
+function KeyStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div style={{ display: "inline-flex", alignItems: "baseline", gap: 6, marginBottom: 12 }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.1rem",
+        fontWeight: 700, color: "#ffd60a" }}>{value}</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
+        color: "#6b7280", textTransform: "uppercase", letterSpacing: ".08em" }}>{label}</span>
+    </div>
+  );
+}
+
+function Summary({ text }: { text: string }) {
+  return (
+    <p style={{ fontSize: ".88rem", color: "#d1d5db", lineHeight: 1.7, margin: 0 }}>
+      {text}
+    </p>
+  );
+}
+
 function renderAgent1(data: Record<string, any>) {
-  const sentimentColor: Record<string, "green" | "yellow" | "orange" | "red" | "gray"> = {
-    "Very Positive": "green", "Positive": "green", "Mixed": "yellow",
-    "Negative": "orange", "Very Negative": "red",
-  };
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <ScoreBar value={Number(data.score) || 0} label="sentiment" />
-        <Badge text={data.sentiment_label || "Mixed"} color={sentimentColor[data.sentiment_label] || "gray"} />
-      </div>
-      <p style={{ fontSize: ".88rem", color: "#e5e7eb", lineHeight: 1.7,
-        borderLeft: "2px solid #2a2a2c", paddingLeft: 14, margin: "0 0 16px" }}>
-        {data.summary}
-      </p>
-      {data.top_themes?.length > 0 && (
-        <>
-          <SectionLabel text="Key Themes" />
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {data.top_themes.map((t: string, i: number) => <Badge key={i} text={t} color="gray" />)}
-          </div>
-        </>
-      )}
-      {data.key_quote && (
-        <>
-          <SectionLabel text="Representative Voice" />
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem", color: "#9ca3af",
-            fontStyle: "italic", margin: 0 }}>"{data.key_quote}"</p>
-        </>
-      )}
-      {data.data_caveat && (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem", color: "#6b7280",
-          marginTop: 14, borderLeft: "2px solid #2a2a2c", paddingLeft: 10 }}>
-          ⚠ {data.data_caveat}
-        </p>
-      )}
+      <KeyStat value={`${data.score || 0}/10`} label={data.sentiment_label || "Mixed"} />
+      <Summary text={data.summary || ""} />
     </>
   );
 }
 
 function renderAgent2(data: Record<string, any>) {
-  const trendColor: Record<string, "green"|"yellow"|"orange"|"red"> = {
-    surging: "green", growing: "green", stable: "yellow", declining: "red"
-  };
+  const salary = data.salary_range || {};
+  const range = salary.min && salary.max
+    ? `$${(salary.min / 1000).toFixed(0)}K–${(salary.max / 1000).toFixed(0)}K`
+    : "N/A";
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <ScoreBar value={Number(data.demand_score) || 0} label="demand" />
-        <Badge text={data.hiring_trend || "stable"} color={trendColor[data.hiring_trend] || "yellow"} />
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 12 }}>
+        <KeyStat value={`${data.demand_score || 0}/10`} label="demand" />
+        <KeyStat value={range} label="salary range (AUD)" />
       </div>
-      {data.salary_range && (
-        <div style={{ background: "#111", borderRadius: 6, padding: "14px 18px",
-          display: "inline-block", marginBottom: 16 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-            color: "#6b7280", textTransform: "uppercase", letterSpacing: ".1em" }}>
-            Est. Salary Range&nbsp;
-          </span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "1rem",
-            fontWeight: 700, color: "#ffd60a" }}>
-            ${(data.salary_range.min / 1000).toFixed(0)}K – ${(data.salary_range.max / 1000).toFixed(0)}K AUD
-          </span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-            color: "#4b5563", marginLeft: 8 }}>estimate only</span>
-        </div>
-      )}
-      {data.top_roles?.length > 0 && (
-        <>
-          <SectionLabel text="Top Roles" />
-          <BulletList items={data.top_roles} />
-        </>
-      )}
-      {data.top_industries?.length > 0 && (
-        <>
-          <SectionLabel text="Top Hiring Industries" />
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {data.top_industries.map((t: string, i: number) => <Badge key={i} text={t} color="blue" />)}
-          </div>
-        </>
-      )}
-      {data.job_volume_estimate && (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem", color: "#6b7280",
-          marginTop: 14, borderLeft: "2px solid #2a2a2c", paddingLeft: 10 }}>
-          ⚠ Volume: {data.job_volume_estimate}
-        </p>
-      )}
+      <Summary text={`Hiring trend: ${data.hiring_trend || "stable"}. Top roles include ${(data.top_roles || []).join(", ")}.`} />
     </>
   );
 }
 
 function renderAgent3(data: Record<string, any>) {
+  const paths = (data.top_career_paths || [])
+    .map((p: any) => `${p.title} (~$${(p.avg_salary_aud / 1000).toFixed(0)}K, ${p.years_to_reach})`)
+    .join("; ");
   return (
     <>
-      {data.top_career_paths?.length > 0 && (
-        <>
-          <SectionLabel text="Career Paths" />
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {data.top_career_paths.map((p: any, i: number) => (
-              <div key={i} style={{ background: "#111", borderRadius: 6,
-                padding: "12px 16px", display: "flex",
-                justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                <div>
-                  <span style={{ fontSize: ".88rem", fontWeight: 600, color: "white" }}>{p.title}</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem",
-                    color: "#6b7280", marginLeft: 12 }}>{p.years_to_reach}</span>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: ".85rem",
-                    color: "#ffd60a", fontWeight: 700 }}>
-                    ~${(p.avg_salary_aud / 1000).toFixed(0)}K
-                  </span>
-                  <Badge text={`${p.salary_certainty} certainty`}
-                    color={p.salary_certainty === "medium" ? "yellow" : "orange"} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-      {data.transferable_skills?.length > 0 && (
-        <>
-          <SectionLabel text="Transferable Skills" />
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {data.transferable_skills.map((s: string, i: number) => <Badge key={i} text={s} color="blue" />)}
-          </div>
-        </>
-      )}
-      {data.entry_point && (
-        <>
-          <SectionLabel text="Best Entry Point" />
-          <p style={{ fontSize: ".86rem", color: "#e5e7eb", margin: 0 }}>{data.entry_point}</p>
-        </>
-      )}
-      {data.path_caveats && (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem", color: "#6b7280",
-          marginTop: 14, borderLeft: "2px solid #2a2a2c", paddingLeft: 10 }}>
-          ⚠ {data.path_caveats}
-        </p>
-      )}
+      {data.entry_point && <KeyStat value={data.entry_point} label="best entry point" />}
+      <Summary text={paths || "No career paths available."} />
     </>
   );
 }
 
 function renderAgent4(data: Record<string, any>) {
-  const riskColor: Record<string, "green"|"yellow"|"red"> = { low: "green", medium: "yellow", high: "red" };
-  const outlookColor: Record<string, "green"|"yellow"|"orange"> = {
-    optimistic: "green", neutral: "yellow", cautious: "orange"
-  };
   return (
     <>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
-        <ScoreBar value={Number(data.trajectory_score) || 0} label="trajectory" />
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <Badge text={`AI risk: ${data.ai_disruption_risk || "medium"}`}
-            color={riskColor[data.ai_disruption_risk] || "yellow"} />
-          <Badge text={`5yr: ${data.five_year_outlook || "neutral"}`}
-            color={outlookColor[data.five_year_outlook] || "yellow"} />
-        </div>
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 12 }}>
+        <KeyStat value={`${data.trajectory_score || 0}/10`} label="growth" />
+        <KeyStat value={data.ai_disruption_risk || "medium"} label="AI risk" />
       </div>
-      {data.ai_risk_detail && (
-        <p style={{ fontSize: ".86rem", color: "#e5e7eb", lineHeight: 1.7,
-          borderLeft: "2px solid #2a2a2c", paddingLeft: 14, margin: "0 0 4px" }}>
-          {data.ai_risk_detail}
-        </p>
-      )}
-      {data.safe_bets?.length > 0 && (
-        <>
-          <SectionLabel text="Safe Bets" />
-          <BulletList items={data.safe_bets} color="#34d399" />
-        </>
-      )}
-      {data.subjects_to_avoid?.length > 0 && (
-        <>
-          <SectionLabel text="Avoid" />
-          <BulletList items={data.subjects_to_avoid} color="#ef4444" />
-        </>
-      )}
-      {data.wildcard_risk && (
-        <>
-          <Divider />
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: ".68rem", color: "#f59e0b" }}>
-            ⚡ Wildcard: {data.wildcard_risk}
-          </p>
-        </>
-      )}
+      <Summary text={data.ai_risk_detail || ""} />
     </>
   );
 }
 
 function renderAgent5(data: Record<string, any>) {
-  const sevColor: Record<string, "red"|"orange"|"yellow"|"gray"> = {
-    critical: "red", high: "orange", medium: "yellow", low: "gray"
-  };
+  const top = (data.bottlenecks || []).slice(0, 3)
+    .map((b: any) => b.issue).join(", ");
   return (
     <>
-      {data.bottlenecks?.length > 0 && (
-        <>
-          <SectionLabel text="AI Bottlenecks" />
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {data.bottlenecks.slice(0, 4).map((b: any, i: number) => (
-              <div key={i} style={{ background: "#111", borderRadius: 6, padding: "12px 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <Badge text={b.severity} color={sevColor[b.severity] || "gray"} />
-                  <span style={{ fontSize: ".85rem", fontWeight: 600, color: "white" }}>{b.issue}</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-                    color: "#4b5563", marginLeft: "auto" }}>{b.who_it_hits}</span>
-                </div>
-                <p style={{ fontSize: ".8rem", color: "#9ca3af", margin: 0, lineHeight: 1.6 }}>{b.detail}</p>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-      <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
-        {data.ai_noise_factor && (
-          <div>
-            <SectionLabel text="AI Noise" />
-            <Badge text={data.ai_noise_factor}
-              color={data.ai_noise_factor === "high" ? "red" : data.ai_noise_factor === "medium" ? "yellow" : "green"} />
-          </div>
-        )}
-        {data.skill_atrophy_risk && (
-          <div>
-            <SectionLabel text="Atrophy Risk" />
-            <Badge text={data.skill_atrophy_risk}
-              color={data.skill_atrophy_risk === "high" ? "red" : data.skill_atrophy_risk === "medium" ? "yellow" : "green"} />
-          </div>
-        )}
-      </div>
-      {data.silver_lining && (
-        <>
-          <Divider />
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: ".68rem", color: "#34d399" }}>
-            ✦ Silver lining: {data.silver_lining}
-          </p>
-        </>
-      )}
+      <KeyStat value={data.ai_noise_factor || "medium"} label="AI noise level" />
+      <Summary text={`Key bottlenecks: ${top}. ${data.silver_lining || ""}`} />
     </>
   );
 }
 
 function renderAgent6(data: Record<string, any>) {
-  const verdictStyle: Record<string, { color: string; bg: string; label: string }> = {
-    go:     { color: "#34d399", bg: "rgba(52,211,153,.08)", label: "GO" },
-    caution:{ color: "#f59e0b", bg: "rgba(245,158,11,.08)",  label: "CAUTION" },
-    avoid:  { color: "#ef4444", bg: "rgba(239,68,68,.08)",   label: "AVOID" },
+  const verdictColor: Record<string, string> = {
+    go: "#34d399", caution: "#f59e0b", avoid: "#ef4444",
   };
-  const v = verdictStyle[data.verdict] || verdictStyle.caution;
+  const color = verdictColor[data.verdict] || "#f59e0b";
   return (
     <>
-      {/* Verdict hero */}
-      <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24,
-        padding: "20px 24px", background: v.bg,
-        border: `1px solid ${v.color}22`, borderRadius: 8 }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "2.2rem",
-          fontWeight: 900, color: v.color, letterSpacing: ".05em" }}>
-          {v.label}
-        </div>
-        <div>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-            color: "#6b7280", textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 4 }}>
-            Verdict
-          </p>
-          <p style={{ fontSize: "1rem", fontWeight: 600, color: "white",
-            margin: 0, lineHeight: 1.5 }}>
-            {data.one_liner}
-          </p>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.4rem",
+          fontWeight: 900, color, textTransform: "uppercase", letterSpacing: ".05em" }}>
+          {data.verdict || "N/A"}
+        </span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem",
+          color: "#6b7280" }}>{data.confidence_score || 0}/10 confidence</span>
       </div>
-
-      {/* Confidence */}
-      <ScoreBar value={Number(data.confidence_score) || 0} label="confidence" />
-      {data.confidence_note && (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
-          color: "#6b7280", marginTop: 4, marginBottom: 16, paddingLeft: 84 }}>
-          {data.confidence_note}
-        </p>
-      )}
-
-      {/* Recommendation */}
-      {data.recommendation && (
-        <>
-          <SectionLabel text="Recommendation" />
-          <p style={{ fontSize: ".9rem", color: "#e5e7eb", lineHeight: 1.75, margin: 0 }}>
-            {data.recommendation}
-          </p>
-        </>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 20 }}>
-        {data.doors_opened?.length > 0 && (
-          <div>
-            <SectionLabel text="Doors Opened" />
-            <BulletList items={data.doors_opened} color="#34d399" />
-          </div>
-        )}
-        {data.doors_closed?.length > 0 && (
-          <div>
-            <SectionLabel text="Doors Closed" />
-            <BulletList items={data.doors_closed} color="#ef4444" />
-          </div>
-        )}
-      </div>
-
-      {data.risk_flag && (
-        <>
-          <Divider />
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <span style={{ color: "#ef4444", fontSize: "1rem", flexShrink: 0 }}>⚑</span>
-            <p style={{ fontSize: ".86rem", color: "#ef4444", margin: 0, lineHeight: 1.6 }}>
-              <strong>Key Risk:</strong> {data.risk_flag}
-            </p>
-          </div>
-        </>
-      )}
-
-      {data.disclaimer && (
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: ".58rem",
-          color: "#374151", marginTop: 20, textAlign: "center" }}>
-          {data.disclaimer}
-        </p>
-      )}
+      <p style={{ fontSize: ".95rem", color: "white", lineHeight: 1.7,
+        margin: "0 0 10px", fontWeight: 600 }}>
+        {data.one_liner || ""}
+      </p>
+      <Summary text={data.recommendation || ""} />
     </>
   );
 }
@@ -482,98 +260,55 @@ function AgentCard({ agentId, data, streamText, status }: {
   streamText: string;
   status: AgentStatus;
 }) {
-  const [showRaw, setShowRaw] = useState(false);
-  const logRef = useRef<HTMLDivElement>(null);
   const isRunning = status === "running";
   const isDone = status === "complete";
   const isFinal = agentId === 6;
 
-  useEffect(() => {
-    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
-  }, [streamText]);
-
   return (
     <div style={{
-      border: `1px solid ${isRunning ? "#f59e0b" : isDone ? (isFinal ? "#ffd60a" : "#2a2a2c") : "#1e1e20"}`,
-      borderRadius: "10px",
-      background: isFinal && isDone ? "#0a0a0b" : "#111113",
-      padding: isFinal && isDone ? "32px 36px" : "22px 28px",
-      marginBottom: 16,
-      boxShadow: isFinal && isDone ? "0 0 40px rgba(255,214,10,.05)" : "none",
+      borderRadius: 10,
+      background: "#111113",
+      padding: "20px 24px",
+      marginBottom: 12,
+      borderLeft: `3px solid ${isDone ? (isFinal ? "#ffd60a" : "#2a2a2c") : isRunning ? "#f59e0b" : "#1e1e20"}`,
     }}>
       {/* Card header */}
-      <div style={{ display: "flex", alignItems: "center",
-        justifyContent: "space-between", marginBottom: isDone ? 20 : 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem",
-            background: "rgba(255,214,10,.08)", color: "#ffd60a",
-            padding: "2px 8px", borderRadius: 3 }}>
-            {String(agentId).padStart(2, "0")}
-          </span>
-          <span style={{ fontSize: isFinal ? "1.1rem" : "1rem",
-            fontWeight: 700, color: "white" }}>
-            {AGENTS[agentId - 1]?.name}
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {isDone && streamText && (
-            <button
-              onClick={() => setShowRaw(r => !r)}
-              style={{ fontFamily: "var(--font-mono)", fontSize: ".58rem",
-                color: "#4b5563", background: "none", border: "none",
-                cursor: "pointer", textDecoration: "underline", padding: 0 }}>
-              {showRaw ? "hide raw" : "show raw"}
-            </button>
-          )}
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-            textTransform: "uppercase", padding: "3px 10px", borderRadius: 3,
-            border: `1px solid ${isRunning ? "#f59e0b" : "#2a2a2c"}`,
-            color: isRunning ? "#f59e0b" : isDone ? "#4b5563" : "#2a2a2c" }}>
-            {isRunning ? "RUNNING" : isDone ? "COMPLETE" : "IDLE"}
-          </span>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: isDone ? 14 : 6 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem", color: "#4b5563" }}>
+          {String(agentId).padStart(2, "0")}
+        </span>
+        <span style={{ fontSize: ".9rem", fontWeight: 600, color: isDone ? "white" : "#6b7280" }}>
+          {AGENTS[agentId - 1]?.name}
+        </span>
       </div>
 
-      {/* Thinking indicator while running */}
+      {/* Thinking indicator */}
       {isRunning && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
           <div style={{ display: "flex", gap: 4 }}>
             {[0, 1, 2].map(i => (
               <div key={i} style={{
-                width: 5, height: 5, borderRadius: "50%", background: "#f59e0b",
+                width: 4, height: 4, borderRadius: "50%", background: "#f59e0b",
                 animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
               }} />
             ))}
           </div>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem", color: "#6b7280" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem", color: "#4b5563" }}>
             analysing...
           </span>
         </div>
       )}
 
-      {/* Raw output (collapsible) */}
-      {showRaw && streamText && (
-        <div ref={logRef} style={{
-          background: "rgba(0,0,0,.6)", border: "1px solid #1e1e20", borderRadius: 6,
-          padding: 12, maxHeight: 140, overflowY: "auto",
-          fontFamily: "var(--font-mono)", fontSize: ".68rem",
-          color: "#4b5563", whiteSpace: "pre-wrap", lineHeight: 1.5, marginBottom: 16,
-        }}>
-          {streamText}
-        </div>
-      )}
-
-      {/* Clean parsed output */}
+      {/* Parsed output */}
       {isDone && data && (
-        <div style={{ borderTop: isDone ? "1px solid #1e1e20" : "none",
-          paddingTop: isDone ? 18 : 0 }}>
+        <>
           {agentId === 1 && renderAgent1(data)}
           {agentId === 2 && renderAgent2(data)}
           {agentId === 3 && renderAgent3(data)}
           {agentId === 4 && renderAgent4(data)}
           {agentId === 5 && renderAgent5(data)}
           {agentId === 6 && renderAgent6(data)}
-        </div>
+        </>
       )}
     </div>
   );
