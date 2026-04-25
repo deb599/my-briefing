@@ -158,28 +158,25 @@ function KeyStat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function Bullets({ items }: { items: string[] }) {
+function InfoLine({ label, value }: { label: string; value: string }) {
   return (
-    <ul style={{ margin: "6px 0 0", paddingLeft: 16, listStyle: "none" }}>
-      {items.map((item, i) => (
-        <li key={i} style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6,
-          marginBottom: 4, paddingLeft: 8, position: "relative" }}>
-          <span style={{ position: "absolute", left: -8, color: "#4b5563" }}>·</span>
-          {item}
-        </li>
-      ))}
-    </ul>
+    <p style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 6px" }}>
+      <strong style={{ color: "#9ca3af" }}>{label}:</strong> {value}
+    </p>
   );
 }
 
 function renderAgent1(data: Record<string, any>) {
   return (
     <>
-      <KeyStat value={`${data.score || 0}/10`} label={data.sentiment_label || "Mixed"} />
-      <Bullets items={[
-        data.summary || "",
-        ...(data.top_themes || []),
-      ].filter(Boolean)} />
+      <InfoLine label="Sentiment" value={`${data.sentiment_label || "Mixed"} (${data.score || 0}/10)`} />
+      <p style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 6px" }}>{data.summary || ""}</p>
+      {data.top_themes?.length > 0 && <InfoLine label="Key themes" value={data.top_themes.join(", ")} />}
+      {data.key_quote && (
+        <p style={{ fontSize: ".8rem", color: "#6b7280", fontStyle: "italic", margin: "8px 0 0" }}>
+          &ldquo;{data.key_quote}&rdquo;
+        </p>
+      )}
     </>
   );
 }
@@ -187,19 +184,15 @@ function renderAgent1(data: Record<string, any>) {
 function renderAgent2(data: Record<string, any>) {
   const salary = data.salary_range || {};
   const range = salary.min && salary.max
-    ? `$${(salary.min / 1000).toFixed(0)}K–${(salary.max / 1000).toFixed(0)}K AUD`
+    ? `$${(salary.min).toLocaleString()} – $${(salary.max).toLocaleString()} AUD`
     : "N/A";
   return (
     <>
-      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 12 }}>
-        <KeyStat value={`${data.demand_score || 0}/10`} label="demand" />
-        <KeyStat value={range} label="salary range" />
-      </div>
-      <Bullets items={[
-        `Trend: ${data.hiring_trend || "stable"}`,
-        `Top roles: ${(data.top_roles || []).join(", ")}`,
-        `Industries: ${(data.top_industries || []).join(", ")}`,
-      ]} />
+      <InfoLine label="Demand" value={`${data.demand_level || "medium"} (${data.demand_score || 0}/10)`} />
+      <InfoLine label="Top roles" value={(data.top_roles || []).join(", ")} />
+      <InfoLine label="Salary range" value={range} />
+      <InfoLine label="Hiring trend" value={data.hiring_trend || "stable"} />
+      <InfoLine label="Top industries" value={(data.top_industries || []).join(", ")} />
     </>
   );
 }
@@ -207,13 +200,19 @@ function renderAgent2(data: Record<string, any>) {
 function renderAgent3(data: Record<string, any>) {
   return (
     <>
-      {data.entry_point && <KeyStat value={data.entry_point} label="best entry point" />}
-      <Bullets items={[
-        ...(data.top_career_paths || []).map((p: any) =>
-          `${p.title} — ~$${(p.avg_salary_aud / 1000).toFixed(0)}K, ${p.years_to_reach}`
-        ),
-        ...(data.transferable_skills?.length ? [`Key skills: ${data.transferable_skills.join(", ")}`] : []),
-      ]} />
+      {data.recommended_combinations?.length > 0 && (
+        <InfoLine label="Recommended combos" value={data.recommended_combinations.join(", ")} />
+      )}
+      {(data.top_career_paths || []).map((p: any, i: number) => (
+        <p key={i} style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 4px" }}>
+          <strong style={{ color: "white" }}>{p.title}</strong>
+          <span style={{ color: "#6b7280" }}> — {p.years_to_reach}, ~${(p.avg_salary_aud || 0).toLocaleString()} AUD</span>
+        </p>
+      ))}
+      {data.entry_point && <InfoLine label="Entry point" value={data.entry_point} />}
+      {data.transferable_skills?.length > 0 && (
+        <InfoLine label="Transferable skills" value={data.transferable_skills.join(", ")} />
+      )}
     </>
   );
 }
@@ -221,14 +220,11 @@ function renderAgent3(data: Record<string, any>) {
 function renderAgent4(data: Record<string, any>) {
   return (
     <>
-      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 12 }}>
-        <KeyStat value={`${data.trajectory_score || 0}/10`} label="growth" />
-        <KeyStat value={data.ai_disruption_risk || "medium"} label="AI risk" />
-      </div>
-      <Bullets items={[
-        data.ai_risk_detail || "",
-        ...(data.safe_bets || []).slice(0, 2).map((s: string) => `Safe bet: ${s}`),
-      ].filter(Boolean)} />
+      <InfoLine label="Growth" value={`${data.growth_trajectory || "stable"} (${data.trajectory_score || 0}/10)`} />
+      <InfoLine label="AI disruption risk" value={`${data.ai_disruption_risk || "medium"} — ${data.ai_risk_detail || ""}`} />
+      <InfoLine label="5-year outlook" value={data.five_year_outlook || "neutral"} />
+      {data.safe_bets?.length > 0 && <InfoLine label="Safe bets" value={data.safe_bets.join(", ")} />}
+      {data.wildcard_risk && <InfoLine label="Wildcard risk" value={data.wildcard_risk} />}
     </>
   );
 }
@@ -236,11 +232,15 @@ function renderAgent4(data: Record<string, any>) {
 function renderAgent5(data: Record<string, any>) {
   return (
     <>
-      <KeyStat value={data.ai_noise_factor || "medium"} label="AI noise level" />
-      <Bullets items={[
-        ...(data.bottlenecks || []).slice(0, 3).map((b: any) => `${b.issue} (${b.severity})`),
-        ...(data.silver_lining ? [`Silver lining: ${data.silver_lining}`] : []),
-      ]} />
+      {(data.bottlenecks || []).slice(0, 4).map((b: any, i: number) => (
+        <p key={i} style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 4px" }}>
+          <strong style={{ color: "white" }}>{b.issue}</strong>
+          <span style={{ color: "#6b7280" }}> ({b.severity}) — {b.detail}</span>
+        </p>
+      ))}
+      {data.ai_noise_factor && <InfoLine label="AI noise" value={`${data.ai_noise_factor} — ${data.ai_noise_detail || ""}`} />}
+      {data.skill_atrophy_risk && <InfoLine label="Skill atrophy risk" value={`${data.skill_atrophy_risk} — ${data.skill_atrophy_detail || ""}`} />}
+      {data.silver_lining && <InfoLine label="Silver lining" value={data.silver_lining} />}
     </>
   );
 }
@@ -252,23 +252,21 @@ function renderAgent6(data: Record<string, any>) {
   const color = verdictColor[data.verdict] || "#f59e0b";
   return (
     <>
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.4rem",
-          fontWeight: 900, color, textTransform: "uppercase", letterSpacing: ".05em" }}>
-          {data.verdict || "N/A"}
-        </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem",
-          color: "#6b7280" }}>{data.confidence_score || 0}/10 confidence</span>
-      </div>
-      <p style={{ fontSize: ".95rem", color: "white", lineHeight: 1.7,
+      <p style={{ fontSize: "1rem", color: "white", lineHeight: 1.7,
         margin: "0 0 10px", fontWeight: 600 }}>
         {data.one_liner || ""}
       </p>
-      <Bullets items={[
-        data.recommendation || "",
-        ...(data.doors_opened || []).slice(0, 2),
-        ...(data.risk_flag ? [`Risk: ${data.risk_flag}`] : []),
-      ].filter(Boolean)} />
+      <p style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 8px" }}>
+        {data.recommendation || ""}
+      </p>
+      <InfoLine label="Confidence" value={`${data.confidence_score || 0}/10`} />
+      <p style={{ fontSize: ".84rem", margin: "0 0 6px" }}>
+        <strong style={{ color: "#9ca3af" }}>Verdict:</strong>{" "}
+        <span style={{ color, fontWeight: 700, textTransform: "uppercase" }}>{data.verdict || "N/A"}</span>
+      </p>
+      {data.doors_opened?.length > 0 && <InfoLine label="Opportunities" value={data.doors_opened.join(", ")} />}
+      {data.doors_closed?.length > 0 && <InfoLine label="Limitations" value={data.doors_closed.join(", ")} />}
+      {data.risk_flag && <InfoLine label="Key risk" value={data.risk_flag} />}
     </>
   );
 }
@@ -403,9 +401,9 @@ export default function Home() {
     updateDNA("interests", dnaProfile.interests.filter(t => t !== tag));
 
   const EXAMPLES = [
-    "Is a Masters in Data Science worth it in 2026?",
-    "Will AI replace software engineers in the next 5 years?",
-    "Is switching to UX Design a smart career move?",
+    "Should I do a Bachelor of Computer Science?",
+    "Is a nursing degree a good choice right now?",
+    "Should I study business or engineering?",
   ];
 
   const EXAMPLES_STUDENT = [
@@ -546,19 +544,25 @@ export default function Home() {
                 <span style={{ color: "#ffd60a" }}>6 AI agents.</span>
                 <br />One honest answer about what to study.
               </h1>
+              <p style={{ fontSize: "1rem", color: "#6b7280", lineHeight: 1.7,
+                maxWidth: 540, margin: "0 auto 12px" }}>
+                Career advisors charge $300/hour. Job boards show you listings, not truth.
+                AI chatbots give confident answers with zero depth.
+              </p>
               <p style={{ fontSize: "1rem", color: "#9ca3af", lineHeight: 1.7,
                 maxWidth: 540, margin: "0 auto" }}>
-                Each agent analyses a different angle — sentiment, job market, career paths,
-                future-proofing, AI risks — then delivers one clear verdict in under 2 minutes.
+                My Briefing runs <strong style={{ color: "white" }}>6 specialised AI agents</strong> in
+                sequence — each building on the last — to give you the full picture
+                in under 2 minutes.
               </p>
             </div>
 
-            {/* Stats row */}
+            {/* Value props */}
             <div style={{ display: "flex", justifyContent: "center", gap: 40,
               marginBottom: 48, flexWrap: "wrap" }}>
               {[
-                { stat: "6", label: "AI agents" },
-                { stat: "5", label: "angles covered" },
+                { stat: "6", label: "specialist agents" },
+                { stat: "$300", label: "vs. career advisor/hr" },
                 { stat: "<2 min", label: "full briefing" },
               ].map(({ stat, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
@@ -585,7 +589,7 @@ export default function Home() {
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && runPipeline()}
-                  placeholder="e.g. Is a Masters in Data Science worth it in 2026?"
+                  placeholder="e.g. Should I do a Bachelor of Computer Science?"
                   style={{ flex: 1, padding: "14px 18px", background: "#0a0a0b",
                     border: "1px solid #2a2a2c", borderRadius: 8, color: "white",
                     fontSize: ".95rem" }}
