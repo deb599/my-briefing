@@ -352,7 +352,7 @@ interface CareerDNA {
 }
 
 export default function Home() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("Should I do a Bachelor of Computer Science?");
   const [apiKey, setApiKey] = useState("");
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [showDNA, setShowDNA] = useState(false);
@@ -589,7 +589,7 @@ export default function Home() {
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && runPipeline()}
-                  placeholder="e.g. Should I do a Bachelor of Computer Science?"
+                  placeholder="Type your career question..."
                   style={{ flex: 1, padding: "14px 18px", background: "#0a0a0b",
                     border: "1px solid #2a2a2c", borderRadius: 8, color: "white",
                     fontSize: ".95rem" }}
