@@ -1007,7 +1007,7 @@ export default function Home() {
                       } else {
                         navigator.clipboard.writeText(text);
                         const btn = document.getElementById("share-btn");
-                        if (btn) { btn.textContent = "COPIED!"; setTimeout(() => btn.textContent = "SHARE YOUR BRIEFING", 2000); }
+                        if (btn) { btn.textContent = "COPIED!"; setTimeout(() => btn.textContent = "TELL A FRIEND", 2000); }
                       }
                     }}
                     id="share-btn"
@@ -1018,13 +1018,66 @@ export default function Home() {
                       transition: "all .2s ease" }}
                     onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,214,10,.08)"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "none"; }}>
-                    SHARE YOUR BRIEFING
+                    TELL A FRIEND
                   </button>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
                     color: "#4b5563", marginTop: 8 }}>
-                    Copies a link your friends can try
+                    Copies a link so they can try it too
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Locked sections — coming soon teasers */}
+            {agentStates[5]?.status === "complete" && (
+              <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 16 }}>
+
+                {/* Locked: Career DNA */}
+                <div style={{ padding: "24px 28px", background: "#111113",
+                  border: "1px dashed #2a2a2c", borderRadius: 10, opacity: 0.6 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <span style={{ fontSize: ".95rem", fontWeight: 700, color: "white" }}>
+                          Career DNA Personalisation
+                        </span>
+                      </div>
+                      <p style={{ fontSize: ".82rem", color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
+                        Get briefings tailored to your interests, strengths, and goals — not generic advice.
+                      </p>
+                    </div>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
+                      color: "#ffd60a", background: "rgba(255,214,10,.08)",
+                      border: "1px solid rgba(255,214,10,.2)",
+                      padding: "4px 12px", borderRadius: 4, whiteSpace: "nowrap" }}>
+                      COMING SOON
+                    </span>
+                  </div>
+                </div>
+
+                {/* Locked: Comparison Table */}
+                <div style={{ padding: "24px 28px", background: "#111113",
+                  border: "1px dashed #2a2a2c", borderRadius: 10, opacity: 0.6 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <span style={{ fontSize: ".95rem", fontWeight: 700, color: "white" }}>
+                          Compare Career Paths
+                        </span>
+                      </div>
+                      <p style={{ fontSize: ".82rem", color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
+                        Run briefings on multiple options side by side — Computer Science vs Engineering vs Business — and see which one fits best.
+                      </p>
+                    </div>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
+                      color: "#ffd60a", background: "rgba(255,214,10,.08)",
+                      border: "1px solid rgba(255,214,10,.2)",
+                      padding: "4px 12px", borderRadius: 4, whiteSpace: "nowrap" }}>
+                      COMING SOON
+                    </span>
+                  </div>
+                </div>
+
               </div>
             )}
           </>
