@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { MOCK_AGENT_DATA, MOCK_AGENT_DATA_PERSONALISED, MOCK_DNA_PROFILE } from "./mock-data";
 
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+// Default to mock mode — real pipeline only runs when user provides an API key
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
 const AGENTS = [
   { id: 1, name: "Sentiment Listener" },

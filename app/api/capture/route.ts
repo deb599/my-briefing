@@ -3,6 +3,99 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const AGENT_LABELS: Record<string, string> = {
+  agent1: "Sentiment Analysis",
+  agent2: "Job Market",
+  agent3: "Career Paths",
+  agent4: "Future-Proofing",
+  agent5: "AI Bottlenecks",
+  agent6: "Final Briefing",
+};
+
+function formatList(items: string[]): string {
+  return items.map(item => `<li style="margin-bottom: 4px;">${item}</li>`).join("");
+}
+
+function formatAgentHtml(agentKey: string, data: any): string {
+  if (!data) return "<p>No data available.</p>";
+
+  // Agent 1: Sentiment
+  if (data.sentiment_label) {
+    return `
+      <p><strong>Sentiment:</strong> ${data.sentiment_label} (${data.score}/10)</p>
+      <p>${data.summary}</p>
+      <p><strong>Key themes:</strong> ${(data.top_themes || []).join(", ")}</p>
+      ${data.key_quote ? `<p style="font-style: italic; color: #666;">"${data.key_quote}"</p>` : ""}
+    `;
+  }
+
+  // Agent 2: Job Market
+  if (data.demand_level) {
+    const salary = data.salary_range || {};
+    return `
+      <p><strong>Demand:</strong> ${data.demand_level} (${data.demand_score}/10)</p>
+      <p><strong>Top roles:</strong> ${(data.top_roles || []).join(", ")}</p>
+      <p><strong>Salary range:</strong> $${(salary.min || 0).toLocaleString()} – $${(salary.max || 0).toLocaleString()} AUD</p>
+      <p><strong>Hiring trend:</strong> ${data.hiring_trend}</p>
+      <p><strong>Top industries:</strong> ${(data.top_industries || []).join(", ")}</p>
+    `;
+  }
+
+  // Agent 3: Career Paths
+  if (data.top_career_paths) {
+    const paths = (data.top_career_paths || [])
+      .map((p: any) => `<li style="margin-bottom: 6px;"><strong>${p.title}</strong> — ${p.years_to_reach}, ~$${(p.avg_salary_aud || 0).toLocaleString()} AUD</li>`)
+      .join("");
+    return `
+      <p><strong>Recommended combos:</strong> ${(data.recommended_combinations || []).join(", ")}</p>
+      <ul style="padding-left: 20px;">${paths}</ul>
+      <p><strong>Entry point:</strong> ${data.entry_point || "N/A"}</p>
+      <p><strong>Transferable skills:</strong> ${(data.transferable_skills || []).join(", ")}</p>
+    `;
+  }
+
+  // Agent 4: Future-Proofing
+  if (data.growth_trajectory) {
+    return `
+      <p><strong>Growth:</strong> ${data.growth_trajectory} (${data.trajectory_score}/10)</p>
+      <p><strong>AI disruption risk:</strong> ${data.ai_disruption_risk} — ${data.ai_risk_detail || ""}</p>
+      <p><strong>5-year outlook:</strong> ${data.five_year_outlook}</p>
+      <p><strong>Safe bets:</strong> ${(data.safe_bets || []).join(", ")}</p>
+      <p><strong>Wildcard risk:</strong> ${data.wildcard_risk || "N/A"}</p>
+    `;
+  }
+
+  // Agent 5: AI Bottlenecks
+  if (data.bottlenecks) {
+    const bottlenecks = (data.bottlenecks || [])
+      .map((b: any) => `<li style="margin-bottom: 6px;"><strong>${b.issue}</strong> (${b.severity}) — ${b.detail}</li>`)
+      .join("");
+    return `
+      <ul style="padding-left: 20px;">${bottlenecks}</ul>
+      <p><strong>AI noise:</strong> ${data.ai_noise_factor} — ${data.ai_noise_detail || ""}</p>
+      <p><strong>Skill atrophy risk:</strong> ${data.skill_atrophy_risk} — ${data.skill_atrophy_detail || ""}</p>
+      <p><strong>Silver lining:</strong> ${data.silver_lining || "N/A"}</p>
+    `;
+  }
+
+  // Agent 6: Final Briefing
+  if (data.recommendation) {
+    return `
+      <p style="font-size: 16px; font-weight: bold; color: #1C1C1E;">${data.one_liner || ""}</p>
+      <p>${data.recommendation}</p>
+      <p><strong>Confidence:</strong> ${data.confidence_score}/10 — ${data.confidence_note || ""}</p>
+      <p><strong>Verdict:</strong> <span style="text-transform: uppercase; font-weight: bold;">${data.verdict || "N/A"}</span></p>
+      <p><strong>Opportunities:</strong> ${(data.doors_opened || []).join(", ")}</p>
+      <p><strong>Limitations:</strong> ${(data.doors_closed || []).join(", ")}</p>
+      <p><strong>Key risk:</strong> ${data.risk_flag || "N/A"}</p>
+      <p style="font-size: 11px; color: #999; margin-top: 12px;">${data.disclaimer || ""}</p>
+    `;
+  }
+
+  // Fallback: extract any summary-like field, or show a cleaned-up version
+  return `<p>${data.summary || data.recommendation || data.one_liner || JSON.stringify(data, null, 2).replace(/[{}"]/g, "").slice(0, 500)}</p>`;
+}
+
 export async function POST(req: Request) {
   try {
     const { email, query, fullAnalysis } = await req.json();
@@ -17,13 +110,14 @@ export async function POST(req: Request) {
     // Format the analysis into clean HTML sections
     const analysisHtml = Object.entries(fullAnalysis || {})
       .map(([agentKey, data]: [string, any]) => {
+        const label = AGENT_LABELS[agentKey] || agentKey.replace("agent", "Phase ");
         return `
           <div style="margin-bottom: 30px; padding: 20px; background: #F9F9F9; border-left: 4px solid #FFD60A;">
             <h3 style="margin-top: 0; color: #1C1C1E; text-transform: uppercase; font-size: 14px; letter-spacing: 1px;">
-              ${agentKey.replace('agent', 'Phase ')}
+              ${label}
             </h3>
             <div style="color: #444; line-height: 1.6;">
-              ${data?.summary || data?.recommendation || JSON.stringify(data)}
+              ${formatAgentHtml(agentKey, data)}
             </div>
           </div>
         `;
