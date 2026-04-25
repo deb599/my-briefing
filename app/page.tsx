@@ -543,20 +543,13 @@ export default function Home() {
               <h1 style={{ fontSize: "clamp(1.8rem, 5vw, 2.8rem)", fontWeight: 900,
                 color: "white", lineHeight: 1.2, margin: "0 0 16px",
                 letterSpacing: "-.02em" }}>
-                Stop making{" "}
-                <span style={{ color: "#ffd60a" }}>$50K decisions</span>
-                <br />with a Google search.
+                <span style={{ color: "#ffd60a" }}>6 AI agents.</span>
+                <br />One honest answer about what to study.
               </h1>
-              <p style={{ fontSize: "1rem", color: "#6b7280", lineHeight: 1.7,
-                maxWidth: 540, margin: "0 auto 12px" }}>
-                Career advisors charge $300/hour. Job boards show you postings, not truth.
-                AI chatbots give confident answers with no depth.
-              </p>
               <p style={{ fontSize: "1rem", color: "#9ca3af", lineHeight: 1.7,
                 maxWidth: 540, margin: "0 auto" }}>
-                My Briefing runs <strong style={{ color: "white" }}>6 specialised AI agents</strong> in
-                sequence — each building on the last — to give you the full picture
-                in under 2 minutes.
+                Each agent analyses a different angle — sentiment, job market, career paths,
+                future-proofing, AI risks — then delivers one clear verdict in under 2 minutes.
               </p>
             </div>
 
@@ -564,8 +557,8 @@ export default function Home() {
             <div style={{ display: "flex", justifyContent: "center", gap: 40,
               marginBottom: 48, flexWrap: "wrap" }}>
               {[
-                { stat: "6", label: "specialist agents" },
-                { stat: "$300", label: "vs. career advisor/hr" },
+                { stat: "6", label: "AI agents" },
+                { stat: "5", label: "angles covered" },
                 { stat: "<2 min", label: "full briefing" },
               ].map(({ stat, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
