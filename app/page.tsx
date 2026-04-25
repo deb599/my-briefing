@@ -377,6 +377,12 @@ export default function Home() {
   const [captureEmail, setCaptureEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [briefingCount, setBriefingCount] = useState(0);
+
+  // Fetch briefing count on load
+  useEffect(() => {
+    fetch("/api/counter").then(r => r.json()).then(d => setBriefingCount(d.count || 0)).catch(() => {});
+  }, []);
 
   const updateAgent = (index: number, updates: Partial<AgentState>) => {
     setAgentStates(prev => {
@@ -440,6 +446,7 @@ export default function Home() {
       updateAgent(i, { status: "complete", data: mockData, streamText: mockStream });
     }
     setLoading(false);
+    fetch("/api/counter", { method: "POST" }).then(r => r.json()).then(d => setBriefingCount(d.count || 0)).catch(() => {});
   };
 
   /* ── real pipeline ── */
@@ -486,6 +493,7 @@ export default function Home() {
       console.error("Pipeline failed", err);
     } finally {
       setLoading(false);
+      fetch("/api/counter", { method: "POST" }).then(r => r.json()).then(d => setBriefingCount(d.count || 0)).catch(() => {});
     }
   };
 
@@ -561,8 +569,8 @@ export default function Home() {
             <div style={{ display: "flex", justifyContent: "center", gap: 40,
               marginBottom: 48, flexWrap: "wrap" }}>
               {[
+                { stat: briefingCount > 0 ? briefingCount.toLocaleString() : "—", label: "briefings generated" },
                 { stat: "6", label: "specialist agents" },
-                { stat: "$300", label: "vs. career advisor/hr" },
                 { stat: "<2 min", label: "full briefing" },
               ].map(({ stat, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
@@ -987,6 +995,36 @@ export default function Home() {
                     {emailError}
                   </p>
                 )}
+
+                {/* Share button */}
+                <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1e1e20" }}>
+                  <button
+                    onClick={() => {
+                      const url = window.location.origin;
+                      const text = `I just ran a career briefing with 6 AI agents — check it out: ${url}`;
+                      if (navigator.share) {
+                        navigator.share({ title: "My Briefing", text, url });
+                      } else {
+                        navigator.clipboard.writeText(text);
+                        const btn = document.getElementById("share-btn");
+                        if (btn) { btn.textContent = "COPIED!"; setTimeout(() => btn.textContent = "SHARE YOUR BRIEFING", 2000); }
+                      }
+                    }}
+                    id="share-btn"
+                    style={{ padding: "10px 28px", background: "none",
+                      color: "#ffd60a", fontWeight: 700, borderRadius: 6,
+                      border: "1px solid #ffd60a33", cursor: "pointer",
+                      fontSize: ".8rem", letterSpacing: ".06em",
+                      transition: "all .2s ease" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,214,10,.08)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "none"; }}>
+                    SHARE YOUR BRIEFING
+                  </button>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
+                    color: "#4b5563", marginTop: 8 }}>
+                    Copies a link your friends can try
+                  </p>
+                </div>
               </div>
             )}
           </>
