@@ -158,11 +158,17 @@ function KeyStat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function Summary({ text }: { text: string }) {
+function Bullets({ items }: { items: string[] }) {
   return (
-    <p style={{ fontSize: ".88rem", color: "#d1d5db", lineHeight: 1.7, margin: 0 }}>
-      {text}
-    </p>
+    <ul style={{ margin: "6px 0 0", paddingLeft: 16, listStyle: "none" }}>
+      {items.map((item, i) => (
+        <li key={i} style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6,
+          marginBottom: 4, paddingLeft: 8, position: "relative" }}>
+          <span style={{ position: "absolute", left: -8, color: "#4b5563" }}>·</span>
+          {item}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -170,7 +176,10 @@ function renderAgent1(data: Record<string, any>) {
   return (
     <>
       <KeyStat value={`${data.score || 0}/10`} label={data.sentiment_label || "Mixed"} />
-      <Summary text={data.summary || ""} />
+      <Bullets items={[
+        data.summary || "",
+        ...(data.top_themes || []),
+      ].filter(Boolean)} />
     </>
   );
 }
@@ -178,27 +187,33 @@ function renderAgent1(data: Record<string, any>) {
 function renderAgent2(data: Record<string, any>) {
   const salary = data.salary_range || {};
   const range = salary.min && salary.max
-    ? `$${(salary.min / 1000).toFixed(0)}K–${(salary.max / 1000).toFixed(0)}K`
+    ? `$${(salary.min / 1000).toFixed(0)}K–${(salary.max / 1000).toFixed(0)}K AUD`
     : "N/A";
   return (
     <>
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 12 }}>
         <KeyStat value={`${data.demand_score || 0}/10`} label="demand" />
-        <KeyStat value={range} label="salary range (AUD)" />
+        <KeyStat value={range} label="salary range" />
       </div>
-      <Summary text={`Hiring trend: ${data.hiring_trend || "stable"}. Top roles include ${(data.top_roles || []).join(", ")}.`} />
+      <Bullets items={[
+        `Trend: ${data.hiring_trend || "stable"}`,
+        `Top roles: ${(data.top_roles || []).join(", ")}`,
+        `Industries: ${(data.top_industries || []).join(", ")}`,
+      ]} />
     </>
   );
 }
 
 function renderAgent3(data: Record<string, any>) {
-  const paths = (data.top_career_paths || [])
-    .map((p: any) => `${p.title} (~$${(p.avg_salary_aud / 1000).toFixed(0)}K, ${p.years_to_reach})`)
-    .join("; ");
   return (
     <>
       {data.entry_point && <KeyStat value={data.entry_point} label="best entry point" />}
-      <Summary text={paths || "No career paths available."} />
+      <Bullets items={[
+        ...(data.top_career_paths || []).map((p: any) =>
+          `${p.title} — ~$${(p.avg_salary_aud / 1000).toFixed(0)}K, ${p.years_to_reach}`
+        ),
+        ...(data.transferable_skills?.length ? [`Key skills: ${data.transferable_skills.join(", ")}`] : []),
+      ]} />
     </>
   );
 }
@@ -210,18 +225,22 @@ function renderAgent4(data: Record<string, any>) {
         <KeyStat value={`${data.trajectory_score || 0}/10`} label="growth" />
         <KeyStat value={data.ai_disruption_risk || "medium"} label="AI risk" />
       </div>
-      <Summary text={data.ai_risk_detail || ""} />
+      <Bullets items={[
+        data.ai_risk_detail || "",
+        ...(data.safe_bets || []).slice(0, 2).map((s: string) => `Safe bet: ${s}`),
+      ].filter(Boolean)} />
     </>
   );
 }
 
 function renderAgent5(data: Record<string, any>) {
-  const top = (data.bottlenecks || []).slice(0, 3)
-    .map((b: any) => b.issue).join(", ");
   return (
     <>
       <KeyStat value={data.ai_noise_factor || "medium"} label="AI noise level" />
-      <Summary text={`Key bottlenecks: ${top}. ${data.silver_lining || ""}`} />
+      <Bullets items={[
+        ...(data.bottlenecks || []).slice(0, 3).map((b: any) => `${b.issue} (${b.severity})`),
+        ...(data.silver_lining ? [`Silver lining: ${data.silver_lining}`] : []),
+      ]} />
     </>
   );
 }
@@ -245,7 +264,11 @@ function renderAgent6(data: Record<string, any>) {
         margin: "0 0 10px", fontWeight: 600 }}>
         {data.one_liner || ""}
       </p>
-      <Summary text={data.recommendation || ""} />
+      <Bullets items={[
+        data.recommendation || "",
+        ...(data.doors_opened || []).slice(0, 2),
+        ...(data.risk_flag ? [`Risk: ${data.risk_flag}`] : []),
+      ].filter(Boolean)} />
     </>
   );
 }
