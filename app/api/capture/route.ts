@@ -138,16 +138,16 @@ export async function POST(req: Request) {
             ${analysisHtml}
           </div>
 
-          <div style="text-align: center; padding: 28px 24px; margin: 0 0 20px; background: #1C1C1E; border-radius: 8px;">
-            <p style="font-size: 13px; color: #F9F9F9; margin: 0 0 6px; font-weight: 700;">Free bonus: The Career DNA Interviewer</p>
-            <p style="font-size: 12px; color: #999; margin: 0 0 18px; line-height: 1.5;">An AI prompt that asks you 50 deep questions to uncover what career actually fits you — not just the "safe" answers.</p>
-            <a href="https://my-briefing-hazel.vercel.app/career-dna-interviewer.pdf" style="display: inline-block; padding: 12px 28px; background: #FFD60A; color: #1C1C1E; font-weight: 800; font-size: 13px; text-decoration: none; border-radius: 6px;">DOWNLOAD FREE PROMPT →</a>
-            <p style="font-size: 11px; color: #666; margin: 14px 0 0; line-height: 1.5;">Loved the briefing? Reply to this email and let us know — we read every one.</p>
-          </div>
-
-          <div style="text-align: center; padding: 24px 0 12px;">
+          <div style="text-align: center; padding: 24px 0 20px;">
             <a href="https://my-briefing-hazel.vercel.app" style="display: inline-block; padding: 14px 32px; background: #FFD60A; color: #1C1C1E; font-weight: 800; font-size: 14px; text-decoration: none; border-radius: 6px; letter-spacing: 0.5px;">TELL A FRIEND →</a>
             <p style="font-size: 12px; color: #999; margin-top: 10px;">Know someone figuring out what to study? Share the link.</p>
+          </div>
+
+          <div style="text-align: center; padding: 28px 24px; margin: 0 0 20px; background: #1C1C1E; border-radius: 8px;">
+            <p style="font-size: 13px; color: #F9F9F9; margin: 0 0 6px; font-weight: 700;">Free: The Career DNA Interviewer</p>
+            <p style="font-size: 12px; color: #999; margin: 0 0 18px; line-height: 1.5;">An AI prompt that asks 50 deep questions to uncover what career actually fits you — not just the "safe" answers. Reply to this email and we'll send it over.</p>
+            <a href="mailto:info@ba-co-pilot.com?subject=Send%20me%20the%20Career%20DNA%20Interviewer&body=Hey%2C%20just%20ran%20a%20briefing%20on%20My%20Briefing%20—%20send%20me%20the%20Career%20DNA%20prompt!%0A%0AQuick%20feedback%20on%20the%20tool%3A%20" style="display: inline-block; padding: 12px 28px; background: #FFD60A; color: #1C1C1E; font-weight: 800; font-size: 13px; text-decoration: none; border-radius: 6px;">GET THE FREE PROMPT →</a>
+            <p style="font-size: 11px; color: #666; margin: 14px 0 0; line-height: 1.5;">We're building this in public — tell us what worked, what didn't, and what you'd want next.</p>
           </div>
 
           <footer style="padding: 20px; text-align: center; border-top: 1px solid #EEE; font-size: 12px; color: #999;">

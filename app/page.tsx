@@ -1034,8 +1034,30 @@ export default function Home() {
                   </p>
                 )}
 
+                {/* Career DNA giveaway + feedback */}
+                <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1e1e20",
+                  background: "#0f0f11", borderRadius: 8, padding: 20, textAlign: "center" as const }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem",
+                    color: "#ffd60a", fontWeight: 700, margin: "0 0 6px" }}>
+                    Free: The Career DNA Interviewer
+                  </p>
+                  <p style={{ fontSize: ".78rem", color: "#6b7280", margin: "0 0 16px", lineHeight: 1.6 }}>
+                    An AI prompt that asks 50 deep questions to uncover what career actually fits you — not just the "safe" answers. Hit the button and we'll send it over.
+                  </p>
+                  <a href="mailto:info@ba-co-pilot.com?subject=Send%20me%20the%20Career%20DNA%20Interviewer&body=Hey%2C%20just%20ran%20a%20briefing%20on%20My%20Briefing%20—%20send%20me%20the%20Career%20DNA%20prompt!%0A%0AQuick%20feedback%20on%20the%20tool%3A%20"
+                    style={{ display: "inline-block", padding: "10px 24px", background: "#ffd60a",
+                      color: "#0a0a0b", fontWeight: 800, fontSize: ".78rem", textDecoration: "none",
+                      borderRadius: 6, fontFamily: "var(--font-mono)", letterSpacing: ".04em" }}>
+                    GET THE FREE PROMPT →
+                  </a>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
+                    color: "#4b5563", marginTop: 12, lineHeight: 1.5 }}>
+                    We're building this in public — tell us what worked, what didn't, and what you'd want next.
+                  </p>
+                </div>
+
                 {/* Share button */}
-                <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1e1e20" }}>
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid #1e1e20" }}>
                   <button
                     onClick={() => {
                       const url = "https://my-briefing-hazel.vercel.app";
