@@ -926,13 +926,37 @@ export default function Home() {
                   {seedQuery}
                 </h2>
               </div>
-              <button onClick={() => { setSubmitted(false); setQuery(""); setAgentStates(AGENTS.map(() => ({ status: "idle", data: null, streamText: "" }))); }}
-                style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem",
-                  color: "#6b7280", background: "none",
-                  border: "1px solid #2a2a2c", borderRadius: 6,
-                  padding: "8px 16px", cursor: "pointer" }}>
-                ← New query
-              </button>
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <button
+                  onClick={() => {
+                    const url = window.location.origin;
+                    const text = `I just ran a career briefing with 6 AI agents — check it out: ${url}`;
+                    navigator.clipboard.writeText(text);
+                    const btn = document.getElementById("share-top-btn");
+                    if (btn) {
+                      btn.innerHTML = "✓ Copied!";
+                      setTimeout(() => { btn.innerHTML = "📤 Tell a friend"; }, 2000);
+                    }
+                  }}
+                  id="share-top-btn"
+                  style={{ fontFamily: "var(--font-mono)", fontSize: ".7rem",
+                    color: "#0a0a0b", background: "#ffd60a",
+                    border: "none", borderRadius: 6,
+                    padding: "9px 18px", cursor: "pointer", fontWeight: 700,
+                    letterSpacing: ".04em", transition: "all .2s ease",
+                    whiteSpace: "nowrap" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#ffe44d"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#ffd60a"; }}>
+                  📤 Tell a friend
+                </button>
+                <button onClick={() => { setSubmitted(false); setQuery(""); setAgentStates(AGENTS.map(() => ({ status: "idle", data: null, streamText: "" }))); }}
+                  style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem",
+                    color: "#6b7280", background: "none",
+                    border: "1px solid #2a2a2c", borderRadius: 6,
+                    padding: "8px 16px", cursor: "pointer" }}>
+                  ← New query
+                </button>
+              </div>
             </div>
 
             {/* Pipeline progress */}
