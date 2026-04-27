@@ -1044,24 +1044,11 @@ export default function Home() {
                   <p style={{ fontSize: ".78rem", color: "#6b7280", margin: "0 0 16px", lineHeight: 1.6 }}>
                     This is an early demo — your feedback shapes what we build next. Tell us what worked and what didn't, and we'll send you <strong style={{ color: "#9ca3af" }}>The Career DNA Interviewer</strong> — an AI prompt that asks 50 deep questions to uncover what career actually fits you.
                   </p>
-                  <p style={{ fontSize: ".78rem", color: "#9ca3af", margin: "0 0 12px", lineHeight: 1.6 }}>
-                    Email <span style={{ color: "#ffd60a" }}>info@ba-co-pilot.com</span> with your feedback and we'll send it to you. Tell us what worked, what didn't, and what you'd want next.
+                  <p style={{ fontSize: ".78rem", color: "#9ca3af", margin: "0 0 10px", lineHeight: 1.7 }}>
+                    Email <a href="mailto:info@ba-co-pilot.com" style={{ color: "#ffd60a", textDecoration: "underline" }}>info@ba-co-pilot.com</a> with your feedback and we'll send it to you. Tell us what worked, what didn't, and what you'd want next.
                   </p>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText("info@ba-co-pilot.com");
-                      const btn = document.getElementById("copy-email-btn");
-                      if (btn) { btn.textContent = "✓ Copied!"; setTimeout(() => { btn.textContent = "COPY EMAIL"; }, 2000); }
-                    }}
-                    id="copy-email-btn"
-                    style={{ display: "inline-block", padding: "10px 24px", background: "#ffd60a",
-                      color: "#0a0a0b", fontWeight: 800, fontSize: ".78rem", border: "none",
-                      borderRadius: 6, fontFamily: "var(--font-mono)", letterSpacing: ".04em",
-                      cursor: "pointer" }}>
-                    COPY EMAIL
-                  </button>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
-                    color: "#4b5563", marginTop: 14, lineHeight: 1.5 }}>
+                    color: "#4b5563", marginTop: 10, lineHeight: 1.5 }}>
                     Want to know when the full version launches? Drop us a line at the same address.
                   </p>
                 </div>
