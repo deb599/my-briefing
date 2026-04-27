@@ -928,7 +928,7 @@ export default function Home() {
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <button
                   onClick={() => {
-                    const url = window.location.origin;
+                    const url = "https://my-briefing-hazel.vercel.app";
                     const text = `Hey, found this cool tool — it runs 6 AI agents to help you figure out what to study after finishing high school: ${url}`;
                     navigator.clipboard.writeText(text);
                     const btn = document.getElementById("share-top-btn");
@@ -1033,7 +1033,7 @@ export default function Home() {
                 <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1e1e20" }}>
                   <button
                     onClick={() => {
-                      const url = window.location.origin;
+                      const url = "https://my-briefing-hazel.vercel.app";
                       const text = `Hey, found this cool tool — it runs 6 AI agents to help you figure out what to study after finishing high school: ${url}`;
                       navigator.clipboard.writeText(text);
                       const btn = document.getElementById("share-btn");
