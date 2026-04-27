@@ -144,10 +144,10 @@ export async function POST(req: Request) {
           </div>
 
           <div style="text-align: center; padding: 28px 24px; margin: 0 0 20px; background: #1C1C1E; border-radius: 8px;">
-            <p style="font-size: 13px; color: #F9F9F9; margin: 0 0 6px; font-weight: 700;">Free: The Career DNA Interviewer</p>
-            <p style="font-size: 12px; color: #999; margin: 0 0 18px; line-height: 1.5;">An AI prompt that asks 50 deep questions to uncover what career actually fits you — not just the "safe" answers. Reply to this email and we'll send it over.</p>
-            <a href="mailto:info@ba-co-pilot.com?subject=Send%20me%20the%20Career%20DNA%20Interviewer&body=Hey%2C%20just%20ran%20a%20briefing%20on%20My%20Briefing%20—%20send%20me%20the%20Career%20DNA%20prompt!%0A%0AQuick%20feedback%20on%20the%20tool%3A%20" style="display: inline-block; padding: 12px 28px; background: #FFD60A; color: #1C1C1E; font-weight: 800; font-size: 13px; text-decoration: none; border-radius: 6px;">GET THE FREE PROMPT →</a>
-            <p style="font-size: 11px; color: #666; margin: 14px 0 0; line-height: 1.5;">We're building this in public — tell us what worked, what didn't, and what you'd want next.</p>
+            <p style="font-size: 13px; color: #F9F9F9; margin: 0 0 6px; font-weight: 700;">Send feedback, get a free prompt</p>
+            <p style="font-size: 12px; color: #999; margin: 0 0 18px; line-height: 1.5;">This is an early demo — your feedback shapes what we build next. Tell us what worked and what didn't, and we'll send you <strong style="color: #ccc;">The Career DNA Interviewer</strong> — an AI prompt that asks 50 deep questions to uncover what career actually fits you.</p>
+            <a href="mailto:info@ba-co-pilot.com?subject=My%20Briefing%20Feedback%20%2B%20Send%20Career%20DNA%20Prompt&body=Hey%2C%20just%20tried%20the%20My%20Briefing%20demo.%0A%0AWhat%20worked%3A%20%0A%0AWhat%20didn't%3A%20%0A%0AWhat%20I'd%20want%20next%3A%20%0A%0APlease%20send%20me%20the%20Career%20DNA%20Interviewer%20prompt!" style="display: inline-block; padding: 12px 28px; background: #FFD60A; color: #1C1C1E; font-weight: 800; font-size: 13px; text-decoration: none; border-radius: 6px;">SEND FEEDBACK →</a>
+            <p style="font-size: 11px; color: #666; margin: 14px 0 0; line-height: 1.5;">Want to know when the full version launches? <a href="mailto:info@ba-co-pilot.com?subject=Sign%20me%20up%20for%20My%20Briefing%20launch&body=Hey%2C%20add%20me%20to%20the%20launch%20list!" style="color: #FFD60A; text-decoration: underline;">Sign up for launch updates</a></p>
           </div>
 
           <footer style="padding: 20px; text-align: center; border-top: 1px solid #EEE; font-size: 12px; color: #999;">

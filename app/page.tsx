@@ -1039,21 +1039,26 @@ export default function Home() {
                   background: "#0f0f11", borderRadius: 8, padding: 20, textAlign: "center" as const }}>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem",
                     color: "#ffd60a", fontWeight: 700, margin: "0 0 6px" }}>
-                    Free: The Career DNA Interviewer
+                    Send feedback, get a free prompt
                   </p>
                   <p style={{ fontSize: ".78rem", color: "#6b7280", margin: "0 0 16px", lineHeight: 1.6 }}>
-                    An AI prompt that asks 50 deep questions to uncover what career actually fits you — not just the "safe" answers. Hit the button and we'll send it over.
+                    This is an early demo — your feedback shapes what we build next. Tell us what worked and what didn't, and we'll send you <strong style={{ color: "#9ca3af" }}>The Career DNA Interviewer</strong> — an AI prompt that asks 50 deep questions to uncover what career actually fits you.
                   </p>
-                  <a href="mailto:info@ba-co-pilot.com?subject=Send%20me%20the%20Career%20DNA%20Interviewer&body=Hey%2C%20just%20ran%20a%20briefing%20on%20My%20Briefing%20—%20send%20me%20the%20Career%20DNA%20prompt!%0A%0AQuick%20feedback%20on%20the%20tool%3A%20"
+                  <a href="mailto:info@ba-co-pilot.com?subject=My%20Briefing%20Feedback%20%2B%20Send%20Career%20DNA%20Prompt&body=Hey%2C%20just%20tried%20the%20My%20Briefing%20demo.%0A%0AWhat%20worked%3A%20%0A%0AWhat%20didn't%3A%20%0A%0AWhat%20I'd%20want%20next%3A%20%0A%0APlease%20send%20me%20the%20Career%20DNA%20Interviewer%20prompt!"
                     style={{ display: "inline-block", padding: "10px 24px", background: "#ffd60a",
                       color: "#0a0a0b", fontWeight: 800, fontSize: ".78rem", textDecoration: "none",
                       borderRadius: 6, fontFamily: "var(--font-mono)", letterSpacing: ".04em" }}>
-                    GET THE FREE PROMPT →
+                    SEND FEEDBACK →
                   </a>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
-                    color: "#4b5563", marginTop: 12, lineHeight: 1.5 }}>
-                    We're building this in public — tell us what worked, what didn't, and what you'd want next.
+                    color: "#4b5563", marginTop: 14, lineHeight: 1.5 }}>
+                    Want to know when the full version launches?
                   </p>
+                  <a href="mailto:info@ba-co-pilot.com?subject=Sign%20me%20up%20for%20My%20Briefing%20launch&body=Hey%2C%20add%20me%20to%20the%20launch%20list!"
+                    style={{ fontFamily: "var(--font-mono)", fontSize: ".68rem",
+                      color: "#ffd60a", textDecoration: "underline", opacity: 0.8 }}>
+                    Sign up for launch updates
+                  </a>
                 </div>
 
                 {/* Share button */}
