@@ -995,8 +995,13 @@ export default function Home() {
                   Get the full report emailed to you
                 </h3>
                 <p style={{ fontSize: ".88rem", color: "#6b7280",
-                  margin: "0 0 24px" }}>
+                  margin: "0 0 8px" }}>
                   A clean summary of all 6 agents sent to your inbox.
+                </p>
+                <p style={{ fontSize: ".72rem", color: "#4b5563",
+                  margin: "0 0 20px", lineHeight: 1.5 }}>
+                  Tip: Check your spam folder and mark as "not spam" if it lands there.
+                  Adding <span style={{ color: "#9ca3af" }}>info@ba-co-pilot.com</span> to your contacts helps too.
                 </p>
                 <div style={{ display: "flex", gap: 10,
                   maxWidth: 480, margin: "0 auto" }}>
