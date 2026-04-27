@@ -1044,21 +1044,26 @@ export default function Home() {
                   <p style={{ fontSize: ".78rem", color: "#6b7280", margin: "0 0 16px", lineHeight: 1.6 }}>
                     This is an early demo — your feedback shapes what we build next. Tell us what worked and what didn't, and we'll send you <strong style={{ color: "#9ca3af" }}>The Career DNA Interviewer</strong> — an AI prompt that asks 50 deep questions to uncover what career actually fits you.
                   </p>
-                  <a href="mailto:info@ba-co-pilot.com?subject=My%20Briefing%20Feedback%20%2B%20Send%20Career%20DNA%20Prompt&body=Hey%2C%20just%20tried%20the%20My%20Briefing%20demo.%0A%0AWhat%20worked%3A%20%0A%0AWhat%20didn't%3A%20%0A%0AWhat%20I'd%20want%20next%3A%20%0A%0APlease%20send%20me%20the%20Career%20DNA%20Interviewer%20prompt!"
+                  <p style={{ fontSize: ".78rem", color: "#9ca3af", margin: "0 0 12px", lineHeight: 1.6 }}>
+                    Email <span style={{ color: "#ffd60a" }}>info@ba-co-pilot.com</span> with your feedback and we'll send it to you. Tell us what worked, what didn't, and what you'd want next.
+                  </p>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText("info@ba-co-pilot.com");
+                      const btn = document.getElementById("copy-email-btn");
+                      if (btn) { btn.textContent = "✓ Copied!"; setTimeout(() => { btn.textContent = "COPY EMAIL"; }, 2000); }
+                    }}
+                    id="copy-email-btn"
                     style={{ display: "inline-block", padding: "10px 24px", background: "#ffd60a",
-                      color: "#0a0a0b", fontWeight: 800, fontSize: ".78rem", textDecoration: "none",
-                      borderRadius: 6, fontFamily: "var(--font-mono)", letterSpacing: ".04em" }}>
-                    SEND FEEDBACK →
-                  </a>
+                      color: "#0a0a0b", fontWeight: 800, fontSize: ".78rem", border: "none",
+                      borderRadius: 6, fontFamily: "var(--font-mono)", letterSpacing: ".04em",
+                      cursor: "pointer" }}>
+                    COPY EMAIL
+                  </button>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
                     color: "#4b5563", marginTop: 14, lineHeight: 1.5 }}>
-                    Want to know when the full version launches?
+                    Want to know when the full version launches? Drop us a line at the same address.
                   </p>
-                  <a href="mailto:info@ba-co-pilot.com?subject=Sign%20me%20up%20for%20My%20Briefing%20launch&body=Hey%2C%20add%20me%20to%20the%20launch%20list!"
-                    style={{ fontFamily: "var(--font-mono)", fontSize: ".68rem",
-                      color: "#ffd60a", textDecoration: "underline", opacity: 0.8 }}>
-                    Sign up for launch updates
-                  </a>
                 </div>
 
                 {/* Share button */}
