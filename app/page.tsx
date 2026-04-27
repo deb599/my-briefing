@@ -831,29 +831,28 @@ export default function Home() {
                 )}
               </div>
 
-              {/* BYOK section */}
+              {/* BYOK section — always visible */}
               <div style={{ marginTop: 16, borderTop: "1px solid #1e1e20", paddingTop: 16 }}>
-                <button onClick={() => setShowKeyInput(k => !k)}
-                  style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
-                    color: "#4b5563", background: "none", border: "none",
-                    cursor: "pointer", padding: 0 }}>
-                  {showKeyInput ? "▼" : "▶"} Use your own Anthropic API key (live mode)
-                </button>
-                {showKeyInput && (
-                  <div style={{ marginTop: 12 }}>
-                    <input type="password" value={apiKey}
-                      onChange={e => setApiKey(e.target.value)}
-                      placeholder="sk-ant-..."
-                      style={{ width: "100%", padding: "10px 14px", background: "#0a0a0b",
-                        border: "1px solid #2a2a2c", borderRadius: 6, color: "white",
-                        fontFamily: "var(--font-mono)", fontSize: ".8rem" }} />
-                    <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-                      color: "#374151", marginTop: 8 }}>
-                      Your key is never stored. Used only for this session's pipeline call.
-                      {USE_MOCK && " (mock mode active — key not used)"}
-                    </p>
-                  </div>
-                )}
+                <label style={{ fontFamily: "var(--font-mono)", fontSize: ".58rem",
+                  color: "#6b7280", textTransform: "uppercase", letterSpacing: ".1em",
+                  display: "block", marginBottom: 8 }}>
+                  API Key <span style={{ color: "#374151", textTransform: "none", letterSpacing: 0 }}>(Anthropic)</span>
+                </label>
+                <input type="password" value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  placeholder="sk-ant-..."
+                  style={{ width: "100%", padding: "10px 14px", background: "#0a0a0b",
+                    border: "1px solid #2a2a2c", borderRadius: 6, color: "white",
+                    fontFamily: "var(--font-mono)", fontSize: ".8rem" }} />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
+                  color: "#374151", marginTop: 8, lineHeight: 1.6 }}>
+                  Your key is never stored — used only for this session.
+                  {USE_MOCK && (
+                    <span style={{ display: "block", marginTop: 4, color: "#ffd60a", opacity: 0.7 }}>
+                      ✦ Demo mode active — no key needed. Hit "Run Briefing" to see a sample analysis.
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -930,7 +929,7 @@ export default function Home() {
                 <button
                   onClick={() => {
                     const url = window.location.origin;
-                    const text = `I just ran a career briefing with 6 AI agents — check it out: ${url}`;
+                    const text = `Hey, found this cool tool — it runs 6 AI agents to help you figure out what to study after finishing high school: ${url}`;
                     navigator.clipboard.writeText(text);
                     const btn = document.getElementById("share-top-btn");
                     if (btn) {
@@ -1035,7 +1034,7 @@ export default function Home() {
                   <button
                     onClick={() => {
                       const url = window.location.origin;
-                      const text = `I just ran a career briefing with 6 AI agents — check it out: ${url}`;
+                      const text = `Hey, found this cool tool — it runs 6 AI agents to help you figure out what to study after finishing high school: ${url}`;
                       navigator.clipboard.writeText(text);
                       const btn = document.getElementById("share-btn");
                       if (btn) { btn.textContent = "COPIED!"; setTimeout(() => btn.textContent = "TELL A FRIEND", 2000); }
