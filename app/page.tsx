@@ -741,19 +741,15 @@ export default function Home() {
               <h1 style={{ fontSize: "clamp(1.8rem, 5vw, 2.8rem)", fontWeight: 900,
                 color: "white", lineHeight: 1.2, margin: "0 0 16px",
                 letterSpacing: "-.02em" }}>
-                <span style={{ color: "#ffd60a" }}>6 AI agents.</span>
-                <br />One honest answer about what to study.
+                The wrong degree costs{" "}
+                <span style={{ color: "#ffd60a" }}>4 years you can't get back.</span>
+                <br />This takes 2 minutes.
               </h1>
-              <p style={{ fontSize: "1rem", color: "#6b7280", lineHeight: 1.7,
-                maxWidth: 540, margin: "0 auto 12px" }}>
-                Career advisors charge $300/hour. Job boards show you listings, not truth.
-                AI chatbots give confident answers with zero depth.
-              </p>
               <p style={{ fontSize: "1rem", color: "#9ca3af", lineHeight: 1.7,
                 maxWidth: 540, margin: "0 auto" }}>
-                My Briefing runs <strong style={{ color: "white" }}>6 specialised AI agents</strong> in
-                sequence — each building on the last — to give you the full picture
-                in under 2 minutes.
+                Everyone's guessing — parents, friends, even Google.
+                My Briefing runs <strong style={{ color: "white" }}>6 specialised AI agents</strong> on
+                any uni path so Year 11 & 12 students get the full picture before they commit.
               </p>
             </div>
 
@@ -762,8 +758,8 @@ export default function Home() {
               marginBottom: 48, flexWrap: "wrap" }}>
               {[
                 { stat: "6", label: "specialist agents" },
-                { stat: "$300", label: "vs. career advisor/hr" },
-                { stat: "<2 min", label: "full briefing" },
+                { stat: "1", label: "honest briefing" },
+                { stat: "<2 min", label: "full analysis" },
               ].map(({ stat, label }) => (
                 <div key={label} style={{ textAlign: "center" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "1.4rem",
