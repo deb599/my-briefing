@@ -547,7 +547,7 @@ export default function Home() {
   const [query, setQuery] = useState("Should I do a Bachelor of Computer Science?");
   const [apiKey, setApiKey] = useState("");
   const [showKeyInput, setShowKeyInput] = useState(false);
-  const [showDNA, setShowDNA] = useState(true);
+  const [showDNA, setShowDNA] = useState(false);
   const [dnaProfile, setDnaProfile] = useState<CareerDNA>({
     enabled: false,
     name: USE_MOCK ? MOCK_DNA_PROFILE.name : "",
