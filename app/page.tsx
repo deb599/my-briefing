@@ -158,22 +158,52 @@ function KeyStat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function InfoLine({ label, value }: { label: string; value: string }) {
+/* ── Tag Chip ── */
+function TagChip({ text, color = "gray" }: { text: string; color?: "yellow" | "green" | "red" | "orange" | "gray" | "blue" }) {
+  const colors: Record<string, { bg: string; border: string; fg: string }> = {
+    yellow: { bg: "rgba(255,214,10,.08)", border: "rgba(255,214,10,.2)", fg: "#ffd60a" },
+    green:  { bg: "rgba(52,211,153,.08)", border: "rgba(52,211,153,.2)", fg: "#34d399" },
+    red:    { bg: "rgba(239,68,68,.08)",  border: "rgba(239,68,68,.2)",  fg: "#ef4444" },
+    orange: { bg: "rgba(245,158,11,.08)", border: "rgba(245,158,11,.2)", fg: "#f59e0b" },
+    gray:   { bg: "rgba(156,163,175,.06)",border: "rgba(156,163,175,.15)",fg: "#9ca3af" },
+    blue:   { bg: "rgba(96,165,250,.08)", border: "rgba(96,165,250,.2)", fg: "#60a5fa" },
+  };
+  const c = colors[color] || colors.gray;
   return (
-    <p style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 6px" }}>
-      <strong style={{ color: "#9ca3af" }}>{label}:</strong> {value}
-    </p>
+    <span style={{ display: "inline-block", fontFamily: "var(--font-mono)", fontSize: ".65rem",
+      background: c.bg, border: `1px solid ${c.border}`, color: c.fg,
+      padding: "4px 10px", borderRadius: 4, margin: "0 6px 6px 0" }}>
+      {text}
+    </span>
+  );
+}
+
+function ChipRow({ items, color = "gray" }: { items: string[]; color?: "yellow" | "green" | "red" | "orange" | "gray" | "blue" }) {
+  if (!items?.length) return null;
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", marginTop: 8 }}>
+      {items.map((item, i) => <TagChip key={i} text={item} color={color} />)}
+    </div>
   );
 }
 
 function renderAgent1(data: Record<string, any>) {
+  const sentimentColor = (data.score || 0) > 6 ? "green" : (data.score || 0) > 3 ? "orange" : "red";
   return (
     <>
-      <InfoLine label="Sentiment" value={`${data.sentiment_label || "Mixed"} (${data.score || 0}/10)`} />
-      <p style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 6px" }}>{data.summary || ""}</p>
-      {data.top_themes?.length > 0 && <InfoLine label="Key themes" value={data.top_themes.join(", ")} />}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+        <Badge text={data.sentiment_label || "Mixed"} color={sentimentColor as any} />
+        {data.concern_level && <Badge text={`Risk: ${data.concern_level}`} color={data.concern_level === "high" ? "red" : data.concern_level === "medium" ? "orange" : "gray"} />}
+      </div>
+      <ScoreBar value={data.score || 0} label="Score" />
+      {data.top_themes?.length > 0 && (
+        <>
+          <SectionLabel text="What people talk about" />
+          <ChipRow items={data.top_themes} color="blue" />
+        </>
+      )}
       {data.key_quote && (
-        <p style={{ fontSize: ".8rem", color: "#6b7280", fontStyle: "italic", margin: "8px 0 0" }}>
+        <p style={{ fontSize: ".78rem", color: "#6b7280", fontStyle: "italic", margin: "10px 0 0", borderLeft: "2px solid #2a2a2c", paddingLeft: 12 }}>
           &ldquo;{data.key_quote}&rdquo;
         </p>
       )}
@@ -183,16 +213,36 @@ function renderAgent1(data: Record<string, any>) {
 
 function renderAgent2(data: Record<string, any>) {
   const salary = data.salary_range || {};
-  const range = salary.min && salary.max
-    ? `$${(salary.min).toLocaleString()} – $${(salary.max).toLocaleString()} AUD`
-    : "N/A";
+  const salaryText = salary.min && salary.max
+    ? `$${Number(salary.min).toLocaleString()} – $${Number(salary.max).toLocaleString()}`
+    : null;
+  const trendColor = data.hiring_trend === "surging" || data.hiring_trend === "growing" ? "green"
+    : data.hiring_trend === "declining" ? "red" : "orange";
   return (
     <>
-      <InfoLine label="Demand" value={`${data.demand_level || "medium"} (${data.demand_score || 0}/10)`} />
-      <InfoLine label="Top roles" value={(data.top_roles || []).join(", ")} />
-      <InfoLine label="Salary range" value={range} />
-      <InfoLine label="Hiring trend" value={data.hiring_trend || "stable"} />
-      <InfoLine label="Top industries" value={(data.top_industries || []).join(", ")} />
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+        <Badge text={data.demand_level || "medium"} color={data.demand_level === "very_high" || data.demand_level === "high" ? "green" : "orange"} />
+        <Badge text={data.hiring_trend || "stable"} color={trendColor as any} />
+      </div>
+      <ScoreBar value={data.demand_score || 0} label="Demand" />
+      {salaryText && (
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "8px 0" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "1.1rem", fontWeight: 700, color: "#ffd60a" }}>{salaryText}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem", color: "#6b7280", textTransform: "uppercase" }}>AUD/yr</span>
+        </div>
+      )}
+      {data.top_roles?.length > 0 && (
+        <>
+          <SectionLabel text="Roles hiring now" />
+          <ChipRow items={data.top_roles} color="yellow" />
+        </>
+      )}
+      {data.top_industries?.length > 0 && (
+        <>
+          <SectionLabel text="Top industries" />
+          <ChipRow items={data.top_industries} color="gray" />
+        </>
+      )}
     </>
   );
 }
@@ -200,75 +250,192 @@ function renderAgent2(data: Record<string, any>) {
 function renderAgent3(data: Record<string, any>) {
   return (
     <>
-      {data.recommended_combinations?.length > 0 && (
-        <InfoLine label="Recommended combos" value={data.recommended_combinations.join(", ")} />
-      )}
       {(data.top_career_paths || []).map((p: any, i: number) => (
-        <p key={i} style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 4px" }}>
-          <strong style={{ color: "white" }}>{p.title}</strong>
-          <span style={{ color: "#6b7280" }}> — {p.years_to_reach}, ~${(p.avg_salary_aud || 0).toLocaleString()} AUD</span>
-        </p>
+        <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 14px", background: "#0a0a0b", borderRadius: 6, marginBottom: 6,
+          border: "1px solid #1e1e20" }}>
+          <div>
+            <span style={{ fontSize: ".88rem", fontWeight: 600, color: "white" }}>{p.title}</span>
+            <span style={{ fontSize: ".72rem", color: "#6b7280", marginLeft: 10 }}>{p.years_to_reach}</span>
+          </div>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".85rem", fontWeight: 700, color: "#ffd60a" }}>
+            ${Number(p.avg_salary_aud || 0).toLocaleString()}
+          </span>
+        </div>
       ))}
-      {data.entry_point && <InfoLine label="Entry point" value={data.entry_point} />}
+      {data.entry_point && (
+        <div style={{ marginTop: 8 }}>
+          <Badge text={`Start: ${data.entry_point}`} color="yellow" />
+        </div>
+      )}
       {data.transferable_skills?.length > 0 && (
-        <InfoLine label="Transferable skills" value={data.transferable_skills.join(", ")} />
+        <>
+          <SectionLabel text="Skills you'd gain that transfer anywhere" />
+          <ChipRow items={data.transferable_skills} color="blue" />
+        </>
       )}
     </>
   );
 }
 
 function renderAgent4(data: Record<string, any>) {
+  const riskColor = data.ai_disruption_risk === "high" ? "red" : data.ai_disruption_risk === "medium" ? "orange" : "green";
+  const outlookColor = data.five_year_outlook === "optimistic" ? "green" : data.five_year_outlook === "cautious" ? "orange" : "gray";
   return (
     <>
-      <InfoLine label="Growth" value={`${data.growth_trajectory || "stable"} (${data.trajectory_score || 0}/10)`} />
-      <InfoLine label="AI disruption risk" value={`${data.ai_disruption_risk || "medium"} — ${data.ai_risk_detail || ""}`} />
-      <InfoLine label="5-year outlook" value={data.five_year_outlook || "neutral"} />
-      {data.safe_bets?.length > 0 && <InfoLine label="Safe bets" value={data.safe_bets.join(", ")} />}
-      {data.wildcard_risk && <InfoLine label="Wildcard risk" value={data.wildcard_risk} />}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+        <Badge text={data.growth_trajectory || "stable"} color="blue" />
+        <Badge text={`AI risk: ${data.ai_disruption_risk || "medium"}`} color={riskColor as any} />
+        <Badge text={`5yr: ${data.five_year_outlook || "neutral"}`} color={outlookColor as any} />
+      </div>
+      <ScoreBar value={data.trajectory_score || 0} label="Growth" />
+      {data.safe_bets?.length > 0 && (
+        <>
+          <SectionLabel text="Safe bets within this field" />
+          <ChipRow items={data.safe_bets} color="green" />
+        </>
+      )}
+      {data.wildcard_risk && (
+        <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(239,68,68,.06)",
+          border: "1px solid rgba(239,68,68,.15)", borderRadius: 6 }}>
+          <span style={{ fontSize: ".72rem", color: "#ef4444", fontFamily: "var(--font-mono)",
+            textTransform: "uppercase", letterSpacing: ".08em" }}>Wildcard </span>
+          <span style={{ fontSize: ".8rem", color: "#d1d5db" }}>{data.wildcard_risk}</span>
+        </div>
+      )}
     </>
   );
 }
 
 function renderAgent5(data: Record<string, any>) {
+  const severityColor = (s: string) => s === "critical" ? "red" : s === "high" ? "orange" : s === "medium" ? "yellow" : "gray";
   return (
     <>
       {(data.bottlenecks || []).slice(0, 4).map((b: any, i: number) => (
-        <p key={i} style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 4px" }}>
-          <strong style={{ color: "white" }}>{b.issue}</strong>
-          <span style={{ color: "#6b7280" }}> ({b.severity}) — {b.detail}</span>
-        </p>
+        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10,
+          padding: "8px 12px", background: "#0a0a0b", borderRadius: 6, marginBottom: 6,
+          border: "1px solid #1e1e20" }}>
+          <Badge text={b.severity || "medium"} color={severityColor(b.severity) as any} />
+          <div>
+            <span style={{ fontSize: ".84rem", fontWeight: 600, color: "white" }}>{b.issue}</span>
+            {b.who_it_hits && (
+              <span style={{ fontSize: ".68rem", color: "#6b7280", marginLeft: 8 }}>Hits: {b.who_it_hits}</span>
+            )}
+          </div>
+        </div>
       ))}
-      {data.ai_noise_factor && <InfoLine label="AI noise" value={`${data.ai_noise_factor} — ${data.ai_noise_detail || ""}`} />}
-      {data.skill_atrophy_risk && <InfoLine label="Skill atrophy risk" value={`${data.skill_atrophy_risk} — ${data.skill_atrophy_detail || ""}`} />}
-      {data.silver_lining && <InfoLine label="Silver lining" value={data.silver_lining} />}
+      <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+        {data.ai_noise_factor && <Badge text={`AI hype confusion: ${data.ai_noise_factor}`} color={data.ai_noise_factor === "high" ? "red" : "orange"} />}
+        {data.skill_atrophy_risk && <Badge text={`Skills becoming obsolete: ${data.skill_atrophy_risk}`} color={data.skill_atrophy_risk === "high" ? "red" : "orange"} />}
+      </div>
+      {data.silver_lining && (
+        <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(52,211,153,.06)",
+          border: "1px solid rgba(52,211,153,.15)", borderRadius: 6 }}>
+          <span style={{ fontSize: ".72rem", color: "#34d399", fontFamily: "var(--font-mono)",
+            textTransform: "uppercase", letterSpacing: ".08em" }}>Upside </span>
+          <span style={{ fontSize: ".8rem", color: "#d1d5db" }}>{data.silver_lining}</span>
+        </div>
+      )}
     </>
   );
 }
 
 function renderAgent6(data: Record<string, any>) {
-  const verdictColor: Record<string, string> = {
-    go: "#34d399", caution: "#f59e0b", avoid: "#ef4444",
-  };
+  const verdictColor: Record<string, string> = { go: "#34d399", caution: "#f59e0b", avoid: "#ef4444" };
+  const verdictBg: Record<string, string> = { go: "rgba(52,211,153,.1)", caution: "rgba(245,158,11,.1)", avoid: "rgba(239,68,68,.1)" };
   const color = verdictColor[data.verdict] || "#f59e0b";
+  const bg = verdictBg[data.verdict] || "rgba(245,158,11,.1)";
+  const fitScore = data.fit_score || 0;
+  const fitColor = fitScore >= 8 ? "#34d399" : fitScore >= 5 ? "#f59e0b" : "#ef4444";
   return (
     <>
-      <p style={{ fontSize: "1rem", color: "white", lineHeight: 1.7,
-        margin: "0 0 10px", fontWeight: 600 }}>
-        {data.one_liner || ""}
-      </p>
-      <p style={{ fontSize: ".84rem", color: "#d1d5db", lineHeight: 1.6, margin: "0 0 8px" }}>
-        {data.recommendation || ""}
-      </p>
-      <InfoLine label="Confidence" value={`${data.confidence_score || 0}/10`} />
-      <p style={{ fontSize: ".84rem", margin: "0 0 6px" }}>
-        <strong style={{ color: "#9ca3af" }}>Verdict:</strong>{" "}
-        <span style={{ color, fontWeight: 700, textTransform: "uppercase" }}>{data.verdict || "N/A"}</span>
-      </p>
-      {data.doors_opened?.length > 0 && <InfoLine label="Opportunities" value={data.doors_opened.join(", ")} />}
-      {data.doors_closed?.length > 0 && <InfoLine label="Limitations" value={data.doors_closed.join(", ")} />}
-      {data.risk_flag && <InfoLine label="Key risk" value={data.risk_flag} />}
+      {/* Fit Score — big and prominent */}
+      <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center",
+          padding: "12px 20px", background: "#0a0a0b", borderRadius: 10,
+          border: `2px solid ${fitColor}`, minWidth: 80 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "2rem", fontWeight: 900, color: fitColor }}>
+            {fitScore}
+          </span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: ".55rem", color: "#6b7280",
+            textTransform: "uppercase", letterSpacing: ".1em" }}>
+            out of 10
+          </span>
+        </div>
+        <div>
+          <Badge text={data.fit_label || "N/A"} color={fitScore >= 8 ? "green" : fitScore >= 5 ? "orange" : "red"} />
+          <p style={{ fontSize: ".9rem", color: "#d1d5db", fontWeight: 500, margin: "6px 0 0", lineHeight: 1.5 }}>
+            {data.one_liner || ""}
+          </p>
+        </div>
+      </div>
+
+      {/* Verdict banner */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "10px 14px",
+        background: bg, borderRadius: 6, marginBottom: 12 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "1rem", fontWeight: 800,
+          color, textTransform: "uppercase", letterSpacing: ".08em" }}>
+          {data.verdict || "N/A"}
+        </span>
+      </div>
+
+      <div style={{ display: "flex", gap: 20, marginTop: 6 }}>
+        {data.doors_opened?.length > 0 && (
+          <div style={{ flex: 1 }}>
+            <SectionLabel text="Opens doors to" />
+            <ChipRow items={data.doors_opened} color="green" />
+          </div>
+        )}
+        {data.doors_closed?.length > 0 && (
+          <div style={{ flex: 1 }}>
+            <SectionLabel text="Limits" />
+            <ChipRow items={data.doors_closed} color="red" />
+          </div>
+        )}
+      </div>
+      {data.risk_flag && (
+        <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(239,68,68,.06)",
+          border: "1px solid rgba(239,68,68,.15)", borderRadius: 6 }}>
+          <span style={{ fontSize: ".72rem", color: "#ef4444", fontFamily: "var(--font-mono)",
+            textTransform: "uppercase", letterSpacing: ".08em" }}>Key risk </span>
+          <span style={{ fontSize: ".8rem", color: "#d1d5db" }}>{data.risk_flag}</span>
+        </div>
+      )}
+      {/* Confidence — subtle, at the bottom */}
+      <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: ".58rem", color: "#4b5563",
+          textTransform: "uppercase", letterSpacing: ".08em" }}>
+          Analysis confidence: {data.confidence_score || 0}/10
+        </span>
+      </div>
     </>
   );
+}
+
+/* ─────────────────────────────────────────
+   AGENT DESCRIPTIONS & DETAIL HELPERS
+───────────────────────────────────────── */
+
+const AGENT_DESCRIPTIONS: Record<number, string> = {
+  1: "What people actually think about this field",
+  2: "Demand, salaries & who's hiring",
+  3: "Where this path leads and how long it takes",
+  4: "Will this field still matter in 5 years?",
+  5: "Where AI creates problems for this career",
+  6: "The bottom line — should you do it?",
+};
+
+function getDetailText(agentId: number, data: Record<string, any>): string | null {
+  if (!data) return null;
+  switch (agentId) {
+    case 1: return data.summary || data.data_caveat || null;
+    case 2: return data.demand_score_note || (data.data_gaps?.length ? `Data gaps: ${data.data_gaps.join(", ")}` : null);
+    case 3: return data.path_caveats || null;
+    case 4: return data.ai_risk_detail || data.trajectory_note || null;
+    case 5: return data.ai_noise_detail || data.skill_atrophy_detail || data.data_caveat || null;
+    case 6: return data.recommendation || data.confidence_note || null;
+    default: return null;
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -281,9 +448,11 @@ function AgentCard({ agentId, data, streamText, status }: {
   streamText: string;
   status: AgentStatus;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const isRunning = status === "running";
   const isDone = status === "complete";
   const isFinal = agentId === 6;
+  const detailText = isDone && data ? getDetailText(agentId, data) : null;
 
   return (
     <div style={{
@@ -294,7 +463,7 @@ function AgentCard({ agentId, data, streamText, status }: {
       borderLeft: `3px solid ${isDone ? (isFinal ? "#ffd60a" : "#2a2a2c") : isRunning ? "#f59e0b" : "#1e1e20"}`,
     }}>
       {/* Card header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: isDone ? 14 : 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem", color: "#4b5563" }}>
           {String(agentId).padStart(2, "0")}
         </span>
@@ -302,6 +471,11 @@ function AgentCard({ agentId, data, streamText, status }: {
           {AGENTS[agentId - 1]?.name}
         </span>
       </div>
+      {/* One-line description */}
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem", color: "#4b5563",
+        margin: "0 0 12px", paddingLeft: 28 }}>
+        {AGENT_DESCRIPTIONS[agentId]}
+      </p>
 
       {/* Thinking indicator */}
       {isRunning && (
@@ -329,6 +503,24 @@ function AgentCard({ agentId, data, streamText, status }: {
           {agentId === 4 && renderAgent4(data)}
           {agentId === 5 && renderAgent5(data)}
           {agentId === 6 && renderAgent6(data)}
+
+          {/* Expandable detail */}
+          {detailText && (
+            <div style={{ marginTop: 12, borderTop: "1px solid #1e1e20", paddingTop: 10 }}>
+              <button onClick={() => setExpanded(e => !e)}
+                style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
+                  color: "#4b5563", background: "none", border: "none",
+                  cursor: "pointer", padding: 0, letterSpacing: ".06em" }}>
+                {expanded ? "▼ Hide detail" : "▶ What does this mean?"}
+              </button>
+              {expanded && (
+                <p style={{ fontSize: ".8rem", color: "#9ca3af", lineHeight: 1.7,
+                  margin: "8px 0 0", paddingLeft: 2 }}>
+                  {detailText}
+                </p>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>
@@ -355,7 +547,7 @@ export default function Home() {
   const [query, setQuery] = useState("Should I do a Bachelor of Computer Science?");
   const [apiKey, setApiKey] = useState("");
   const [showKeyInput, setShowKeyInput] = useState(false);
-  const [showDNA, setShowDNA] = useState(false);
+  const [showDNA, setShowDNA] = useState(true);
   const [dnaProfile, setDnaProfile] = useState<CareerDNA>({
     enabled: false,
     name: USE_MOCK ? MOCK_DNA_PROFILE.name : "",
@@ -641,7 +833,7 @@ export default function Home() {
               </div>
 
               {/* ── Career DNA panel ── */}
-              <div style={{ marginTop: 20, borderTop: "1px solid #1e1e20", paddingTop: 16 }}>
+              <div style={{ marginTop: 20, borderTop: "1px solid rgba(255,214,10,.2)", paddingTop: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <button onClick={() => setShowDNA(d => !d)}
                     style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
@@ -1034,22 +1226,11 @@ export default function Home() {
                   </p>
                 )}
 
-                {/* Career DNA giveaway + feedback */}
+                {/* Feedback CTA */}
                 <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1e1e20",
                   background: "#0f0f11", borderRadius: 8, padding: 20, textAlign: "center" as const }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem",
-                    color: "#ffd60a", fontWeight: 700, margin: "0 0 6px" }}>
-                    Send feedback, get a free prompt
-                  </p>
-                  <p style={{ fontSize: ".78rem", color: "#6b7280", margin: "0 0 16px", lineHeight: 1.6 }}>
-                    This is an early demo — your feedback shapes what we build next. Tell us what worked and what didn't, and we'll send you <strong style={{ color: "#9ca3af" }}>The Career DNA Interviewer</strong> — an AI prompt that asks 50 deep questions to uncover what career actually fits you.
-                  </p>
-                  <p style={{ fontSize: ".78rem", color: "#9ca3af", margin: "0 0 10px", lineHeight: 1.7 }}>
-                    Email <a href="mailto:info@ba-co-pilot.com" style={{ color: "#ffd60a", textDecoration: "underline" }}>info@ba-co-pilot.com</a> with your feedback and we'll send it to you. Tell us what worked, what didn't, and what you'd want next.
-                  </p>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
-                    color: "#4b5563", marginTop: 10, lineHeight: 1.5 }}>
-                    Want to know when the full version launches? Drop us a line at the same address.
+                  <p style={{ fontSize: ".82rem", color: "#9ca3af", margin: "0 0 14px", lineHeight: 1.6 }}>
+                    Early demo — send feedback to <a href="mailto:info@ba-co-pilot.com?subject=My%20Briefing%20Feedback%20%2B%20Send%20Career%20DNA%20Prompt&body=What%20worked%3A%20%0AWhat%20didn't%3A%20%0AWhat%20I'd%20want%20next%3A%20" style={{ color: "#ffd60a", textDecoration: "underline" }}>info@ba-co-pilot.com</a> and get <strong style={{ color: "#d1d5db" }}>The Career DNA Interviewer</strong> prompt free.
                   </p>
                 </div>
 

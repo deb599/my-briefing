@@ -109,6 +109,8 @@ export const MOCK_AGENT_DATA: Record<number, Record<string, any>> = {
     silver_lining: "Students who build real projects and learn to use AI tools effectively have a massive advantage over those who don't.",
   },
   6: {
+    fit_score: 8,
+    fit_label: "Strong",
     recommendation:
       "A Bachelor of Computer Science is a strong choice with excellent career prospects. The degree itself opens doors, but what separates successful graduates is building real projects, securing internships, and picking a specialisation by third year.",
     confidence_score: 8,
@@ -249,6 +251,8 @@ export const MOCK_AGENT_DATA_PERSONALISED: Record<number, Record<string, any>> =
       "Jamie's combination of 3D design, video editing, and systems thinking is exactly the profile emerging 'spatial computing' and XR roles are starving for. This is a niche with almost no competition from peers.",
   },
   6: {
+    fit_score: 9,
+    fit_label: "Excellent",
     recommendation:
       "Jamie should pursue a Computer Science or Software Engineering degree with a deliberate creative specialisation — and start building a public portfolio of personally meaningful projects now, before university. The Technical Optimizer + Entrepreneurial Builder combination is rare and highly valued; the risk is letting formal education crowd out the self-directed building that makes this archetype exceptional.",
     confidence_score: 8,
