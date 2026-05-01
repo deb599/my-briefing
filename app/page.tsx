@@ -786,9 +786,35 @@ export default function Home() {
               </div>
             )}
 
-            {/* Query input */}
+            {/* Main input card */}
             <div style={{ background: "#111113", border: "1px solid #2a2a2c",
               borderRadius: 12, padding: "24px 28px" }}>
+
+              {/* BYOK section — at the top */}
+              <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: "1px solid #1e1e20" }}>
+                <label style={{ fontFamily: "var(--font-mono)", fontSize: ".58rem",
+                  color: "#6b7280", textTransform: "uppercase", letterSpacing: ".1em",
+                  display: "block", marginBottom: 8 }}>
+                  API Key <span style={{ color: "#374151", textTransform: "none", letterSpacing: 0 }}>(Anthropic)</span>
+                </label>
+                <input type="password" value={apiKey}
+                  onChange={e => setApiKey(e.target.value)}
+                  placeholder="sk-ant-..."
+                  style={{ width: "100%", padding: "10px 14px", background: "#0a0a0b",
+                    border: "1px solid #2a2a2c", borderRadius: 6, color: "white",
+                    fontFamily: "var(--font-mono)", fontSize: ".8rem" }} />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
+                  color: "#374151", marginTop: 8, lineHeight: 1.6 }}>
+                  Your key is never stored — used only for this session.
+                  {USE_MOCK && (
+                    <span style={{ display: "block", marginTop: 4, color: "#ffd60a", opacity: 0.7 }}>
+                      ✦ Demo mode active — no key needed. Hit "Run Briefing" to see a sample analysis.
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              {/* Query input */}
               <label style={{ fontFamily: "var(--font-mono)", fontSize: ".62rem",
                 color: "#6b7280", textTransform: "uppercase", letterSpacing: ".12em",
                 display: "block", marginBottom: 12 }}>
@@ -1022,29 +1048,46 @@ export default function Home() {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* BYOK section — always visible */}
-              <div style={{ marginTop: 16, borderTop: "1px solid #1e1e20", paddingTop: 16 }}>
-                <label style={{ fontFamily: "var(--font-mono)", fontSize: ".58rem",
-                  color: "#6b7280", textTransform: "uppercase", letterSpacing: ".1em",
-                  display: "block", marginBottom: 8 }}>
-                  API Key <span style={{ color: "#374151", textTransform: "none", letterSpacing: 0 }}>(Anthropic)</span>
-                </label>
-                <input type="password" value={apiKey}
-                  onChange={e => setApiKey(e.target.value)}
-                  placeholder="sk-ant-..."
-                  style={{ width: "100%", padding: "10px 14px", background: "#0a0a0b",
-                    border: "1px solid #2a2a2c", borderRadius: 6, color: "white",
-                    fontFamily: "var(--font-mono)", fontSize: ".8rem" }} />
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: ".6rem",
-                  color: "#374151", marginTop: 8, lineHeight: 1.6 }}>
-                  Your key is never stored — used only for this session.
-                  {USE_MOCK && (
-                    <span style={{ display: "block", marginTop: 4, color: "#ffd60a", opacity: 0.7 }}>
-                      ✦ Demo mode active — no key needed. Hit "Run Briefing" to see a sample analysis.
-                    </span>
-                  )}
+            {/* Coming Soon — feature teasers */}
+            <div style={{ marginTop: 32, display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 280px", padding: "28px 28px", background: "#111113",
+                border: "1px solid rgba(255,214,10,.15)", borderRadius: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <span style={{ fontSize: "1.2rem" }}>🧬</span>
+                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "white" }}>
+                    Career DNA Personalisation
+                  </span>
+                </div>
+                <p style={{ fontSize: ".85rem", color: "#9ca3af", margin: "0 0 14px", lineHeight: 1.6 }}>
+                  Get briefings tailored to your interests, strengths, and deal-breakers — not generic advice.
                 </p>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem",
+                  color: "#ffd60a", background: "rgba(255,214,10,.1)",
+                  border: "1px solid rgba(255,214,10,.25)",
+                  padding: "5px 14px", borderRadius: 4, fontWeight: 700 }}>
+                  COMING SOON
+                </span>
+              </div>
+
+              <div style={{ flex: "1 1 280px", padding: "28px 28px", background: "#111113",
+                border: "1px solid rgba(255,214,10,.15)", borderRadius: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <span style={{ fontSize: "1.2rem" }}>⚖️</span>
+                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "white" }}>
+                    Compare Career Paths
+                  </span>
+                </div>
+                <p style={{ fontSize: ".85rem", color: "#9ca3af", margin: "0 0 14px", lineHeight: 1.6 }}>
+                  Run briefings on multiple options side by side — CS vs Engineering vs Business — and see which fits best.
+                </p>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: ".65rem",
+                  color: "#ffd60a", background: "rgba(255,214,10,.1)",
+                  border: "1px solid rgba(255,214,10,.25)",
+                  padding: "5px 14px", borderRadius: 4, fontWeight: 700 }}>
+                  COMING SOON
+                </span>
               </div>
             </div>
 
