@@ -80,8 +80,10 @@ function formatAgentHtml(agentKey: string, data: any): string {
 
   // Agent 6: Final Briefing
   if (data.recommendation) {
+    const fitColor = (data.fit_score || 0) >= 8 ? "#22c55e" : (data.fit_score || 0) >= 5 ? "#f59e0b" : "#ef4444";
     return `
       <p style="font-size: 16px; font-weight: bold; color: #1C1C1E;">${data.one_liner || ""}</p>
+      ${data.fit_score ? `<p style="font-size: 18px; font-weight: bold; color: ${fitColor};">Overall Fit: ${data.fit_score}/10 — ${data.fit_label || ""}</p>` : ""}
       <p>${data.recommendation}</p>
       <p><strong>Confidence:</strong> ${data.confidence_score}/10 — ${data.confidence_note || ""}</p>
       <p><strong>Verdict:</strong> <span style="text-transform: uppercase; font-weight: bold;">${data.verdict || "N/A"}</span></p>
