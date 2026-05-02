@@ -1079,7 +1079,7 @@ export default function Home() {
                 <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1e1e20",
                   background: "#0f0f11", borderRadius: 8, padding: 20, textAlign: "center" as const }}>
                   <p style={{ fontSize: ".82rem", color: "#9ca3af", margin: "0 0 14px", lineHeight: 1.6 }}>
-                    Early demo — send feedback to <a href="mailto:info@ba-co-pilot.com?subject=My%20Briefing%20Feedback%20%2B%20Send%20Career%20DNA%20Prompt&body=What%20worked%3A%20%0AWhat%20didn't%3A%20%0AWhat%20I'd%20want%20next%3A%20" style={{ color: "#ffd60a", textDecoration: "underline" }}>info@ba-co-pilot.com</a> and get <strong style={{ color: "#d1d5db" }}>The Career DNA Interviewer</strong> free — an AI prompt that asks 50 deep questions to uncover what career actually fits you.
+                    Early demo — send feedback to <a href="mailto:info@ba-co-pilot.com?subject=My%20Briefing%20Feedback%20%2B%20Send%20Career%20DNA%20Prompt&body=What%20worked%3A%20%0AWhat%20didn't%3A%20%0AWhat%20I'd%20want%20next%3A%20" style={{ color: "#ffd60a", textDecoration: "underline" }}>info@ba-co-pilot.com</a> and get <strong style={{ color: "#d1d5db" }}>The Career DNA Interviewer</strong> free — an AI prompt that explores your interests, strengths and goals to uncover what career actually fits you.
                   </p>
                 </div>
 
