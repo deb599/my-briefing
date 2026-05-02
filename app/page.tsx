@@ -747,9 +747,9 @@ export default function Home() {
               </h1>
               <p style={{ fontSize: "1rem", color: "#9ca3af", lineHeight: 1.7,
                 maxWidth: 540, margin: "0 auto" }}>
-                Everyone's guessing — parents, friends, even Google.
-                My Briefing runs <strong style={{ color: "white" }}>6 specialised AI agents</strong> on
-                any uni path so Year 11 & 12 students get the full picture before they commit.
+                Choosing a degree shouldn't feel like guessing.
+                My Briefing runs <strong style={{ color: "white" }}>6 AI agents</strong> across
+                any uni pathway so high school students know what they're getting into before they commit.
               </p>
             </div>
 
